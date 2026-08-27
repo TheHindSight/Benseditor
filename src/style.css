@@ -1,0 +1,1913 @@
+:root {
+  --bg: #14161c;
+  --panel: #1b1e26;
+  --panel-2: #21252f;
+  --border: #2b303c;
+  --text: #dfe3ec;
+  --muted: #8b93a6;
+  --accent: #29adff;
+  --accent-ink: #04121d;
+  --danger: #ff004d;
+  --ok: #00e436;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  overflow: hidden;
+}
+
+.mono {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 11px;
+}
+
+.grow {
+  flex: 1;
+}
+
+h3 {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---- controls ------------------------------------------------------ */
+
+button {
+  font: inherit;
+  font-size: 12px;
+  padding: 5px 11px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+button:hover:not(:disabled) {
+  background: #2c313e;
+  border-color: #3a4150;
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+button.primary:hover:not(:disabled) {
+  background: #4cbcff;
+}
+
+button.danger {
+  color: #ff9db5;
+}
+
+button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+button.mini {
+  padding: 1px 7px;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+input[type='number'],
+input[type='text'],
+select {
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 6px;
+  min-width: 0;
+  width: 100%;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: #12141a;
+  color: var(--text);
+}
+
+/* Spinners eat most of a narrow field's width, clipping the value. */
+input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+input[type='color'] {
+  width: 100%;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: none;
+  cursor: pointer;
+}
+
+input:focus-visible,
+select:focus-visible,
+button:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+label {
+  font-size: 11px;
+  color: var(--muted);
+  user-select: none;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.field > span {
+  flex: none;
+  min-width: 26px;
+}
+
+.field-row {
+  display: flex;
+  gap: 8px;
+}
+
+.field-row > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.button-row {
+  display: flex;
+  gap: 5px;
+}
+
+.button-row button {
+  flex: 1;
+  padding: 4px 2px;
+}
+
+.kv {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.kv > span {
+  color: var(--muted);
+}
+
+.checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.checks label,
+.pixel-status label,
+.room-status label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.field-error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 11px;
+  min-height: 14px;
+}
+
+/* ---- shell --------------------------------------------------------- */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  height: 44px;
+  flex: none;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 650;
+  color: var(--accent);
+  margin-right: 6px;
+}
+
+.brand span {
+  color: var(--text);
+}
+
+.project-name {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.dirty-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.dirty-dot[hidden] {
+  display: none;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.sidebar {
+  width: 210px;
+  flex: none;
+  overflow-y: auto;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+}
+
+.editor-area {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-host {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panel-host > * {
+  height: 100%;
+  min-height: 0;
+}
+
+/*
+ * Every panel is a grid whose single row must be exactly the panel's height.
+ * Left as the default `auto` the row grows to fit its tallest child instead --
+ * a long script then stretches the code editor to thousands of pixels, and the
+ * bottom of it is simply clipped off with nothing to scroll.
+ */
+.object-editor,
+.room-editor,
+.tileset-editor {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+/* ---- asset tree ----------------------------------------------------- */
+
+.asset-group {
+  border-bottom: 1px solid var(--border);
+  padding: 8px 8px 10px;
+}
+
+.asset-group header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.asset-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.asset-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 6px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.asset-item:hover {
+  background: var(--panel-2);
+}
+
+.asset-icon {
+  font-size: 11px;
+  opacity: 0.8;
+  width: 14px;
+  text-align: center;
+}
+
+.asset-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge {
+  margin-left: auto;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: rgb(41 173 255 / 18%);
+  color: var(--accent);
+}
+
+.empty {
+  margin: 2px 6px;
+}
+
+/* ---- tabs ----------------------------------------------------------- */
+
+.tab-bar {
+  display: flex;
+  flex: none;
+  gap: 1px;
+  padding: 0 6px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tab.active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+  background: var(--bg);
+}
+
+.tab-close {
+  padding: 0 3px;
+  border: none;
+  background: none;
+  color: inherit;
+  font-size: 14px;
+  line-height: 1;
+  border-radius: 3px;
+}
+
+.tab-close:hover {
+  background: var(--border);
+}
+
+/* ---- sprite editor -------------------------------------------------- */
+
+.sprite-editor {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 200px;
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'tools stage side'
+    'frames frames frames';
+  height: 100%;
+}
+
+.pixel-toolbar {
+  grid-area: tools;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 8px;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 28px);
+  gap: 4px;
+}
+
+.tool-grid button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+.swatch-pair {
+  display: flex;
+  gap: 4px;
+  width: 60px;
+}
+
+.palette {
+  display: grid;
+  grid-template-columns: repeat(2, 26px);
+  gap: 3px;
+}
+
+.swatch {
+  width: 26px;
+  height: 20px;
+  padding: 0;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.swatch.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.pixel-stage,
+.room-stage {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.pixel-stage {
+  grid-area: stage;
+}
+
+.pixel-canvas-wrap,
+.room-canvas-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.pixel-view,
+.room-view {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.pixel-view {
+  cursor: crosshair;
+}
+
+.pixel-status,
+.room-status {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: none;
+  padding: 5px 10px;
+  font-size: 11px;
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+}
+
+.pixel-status .mono,
+.room-status .mono {
+  min-width: 54px;
+  color: var(--muted);
+}
+
+.pixel-sidebar,
+.room-sidebar,
+.object-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px;
+  overflow-y: auto;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+}
+
+.pixel-sidebar {
+  grid-area: side;
+}
+
+.pixel-sidebar section,
+.room-sidebar section,
+.object-sidebar section {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.preview-wrap {
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: repeating-conic-gradient(#2b2b2b 0 25%, #3a3a3a 0 50%) 50% / 16px 16px;
+}
+
+.anim-preview,
+.object-preview {
+  image-rendering: pixelated;
+}
+
+.frame-bar {
+  grid-area: frames;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+}
+
+.frame-strip {
+  flex: 1;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+.frame {
+  position: relative;
+  flex: none;
+  padding: 0;
+  line-height: 0;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: none;
+}
+
+.frame canvas {
+  image-rendering: pixelated;
+  display: block;
+  border-radius: 4px;
+}
+
+.frame.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.frame .index {
+  position: absolute;
+  right: 2px;
+  bottom: 1px;
+  font-size: 9px;
+  padding: 0 3px;
+  border-radius: 3px;
+  background: rgb(0 0 0 / 65%);
+  color: #fff;
+}
+
+.frame-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.frame-actions button {
+  width: 27px;
+  height: 27px;
+  padding: 0;
+}
+
+/* ---- room editor ---------------------------------------------------- */
+
+.room-editor {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr) 210px;
+  height: 100%;
+}
+
+.room-objects {
+  padding: 10px 8px;
+  overflow-y: auto;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+}
+
+.object-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+}
+
+.object-entry {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 3px 5px;
+  text-align: left;
+  background: none;
+  border-color: transparent;
+  font-size: 12px;
+}
+
+.object-entry:hover {
+  background: var(--panel-2);
+}
+
+.object-entry.selected {
+  background: rgb(41 173 255 / 18%);
+  border-color: var(--accent);
+}
+
+.object-entry canvas {
+  image-rendering: pixelated;
+  flex: none;
+}
+
+.object-entry span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inspector {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+/* ---- tile layers in the room editor ---------------------------------- */
+
+.room-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+}
+
+.mode-switch {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 7px;
+  background: #12141a;
+}
+
+.mode-button {
+  flex: 1;
+  padding: 4px 6px;
+  font-size: 11px;
+  border: none;
+  background: none;
+}
+
+.mode-button.active {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.panel-instances[hidden],
+.panel-tiles[hidden] {
+  display: none;
+}
+
+.panel-tiles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  flex: 1;
+}
+
+.layer-header,
+.palette-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.layer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.layer-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 4px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+}
+
+.layer-row.selected {
+  background: rgb(41 173 255 / 15%);
+  border-color: var(--accent);
+}
+
+.layer-row input[type='checkbox'] {
+  width: auto;
+  flex: none;
+}
+
+.layer-name {
+  flex: 1;
+  min-width: 0;
+  padding: 2px 4px;
+  text-align: left;
+  background: none;
+  border: none;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tile-palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  overflow-y: auto;
+  padding: 2px;
+  min-height: 0;
+}
+
+.tile-swatch {
+  position: relative;
+  padding: 2px;
+  line-height: 0;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: #12141a;
+}
+
+.tile-swatch canvas {
+  image-rendering: pixelated;
+  display: block;
+}
+
+.tile-swatch.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.tile-swatch.eraser {
+  display: grid;
+  place-items: center;
+  min-width: 28px;
+  min-height: 28px;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.solid-dot {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--danger);
+}
+
+.bucket-toggle.active {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* ---- tileset editor --------------------------------------------------- */
+
+.tileset-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  height: 100%;
+}
+
+.tileset-stage {
+  overflow: auto;
+  padding: 20px;
+  display: grid;
+  place-items: start center;
+  background: repeating-conic-gradient(#1a1d24 0 25%, #20242d 0 50%) 50% / 20px 20px;
+}
+
+.tileset-view {
+  image-rendering: pixelated;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.tileset-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px;
+  overflow-y: auto;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+}
+
+.tileset-sidebar section {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+/* ---- object editor -------------------------------------------------- */
+
+.object-editor {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  height: 100%;
+}
+
+.object-sidebar {
+  border-left: none;
+  border-right: 1px solid var(--border);
+}
+
+.event-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 4px;
+}
+
+.event {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 7px;
+  font-size: 11px;
+  text-align: left;
+  background: none;
+}
+
+.event .dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: rgb(139 147 166 / 45%);
+}
+
+.event.defined {
+  border-color: rgb(0 228 54 / 35%);
+}
+
+.event.defined .dot {
+  background: var(--ok);
+}
+
+/* ---- code editor ---------------------------------------------------- */
+
+.code-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  /* Without this the gutter's line numbers set the floor on the panel's
+     height, and a long file pushes the editor past the bottom of the window. */
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  background: #101219;
+}
+
+.code-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  padding: 7px 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.code-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+/*
+ * Only the textarea scrolls.
+ *
+ * The line numbers and the highlighted <pre> are moved to match it with a
+ * transform rather than a scrollTop of their own. Their boxes have no
+ * scrollbars, so their maximum scroll offset would be a scrollbar's width short
+ * of the textarea's -- and the highlighting would drift out from under the text
+ * at the far end of a long line.
+ */
+.code-gutter {
+  flex: none;
+  overflow: hidden;
+  text-align: right;
+  background: #0d0f15;
+  border-right: 1px solid var(--border);
+  color: #4c5468;
+  user-select: none;
+}
+
+.code-gutter-lines {
+  padding: 10px 8px 10px 12px;
+}
+
+.code-gutter span {
+  display: block;
+}
+
+.code-gutter span.current {
+  color: var(--text);
+}
+
+/* ---- find and replace ------------------------------------------------ */
+
+.code-find {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding: 6px 10px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.code-find[hidden] {
+  display: none;
+}
+
+.find-field {
+  width: auto;
+  flex: 1;
+  max-width: 260px;
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 12px;
+}
+
+.find-count {
+  flex: none;
+  min-width: 82px;
+  text-align: right;
+}
+
+/* ---- status bar ------------------------------------------------------ */
+
+.code-status {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  flex: none;
+  padding: 4px 12px;
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+}
+
+.code-scroll {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.code-highlight,
+.code-input {
+  margin: 0;
+  padding: 10px 14px;
+  border: 0;
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.55;
+  tab-size: 4;
+  white-space: pre;
+}
+
+.code-gutter,
+.code-highlight,
+.code-input {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.code-highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  pointer-events: none;
+  color: var(--text);
+}
+
+/* Sits behind the highlighting, so the caret's line reads as one band. */
+.code-active-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  background: rgb(255 255 255 / 4%);
+}
+
+.code-active-line[hidden] {
+  display: none;
+}
+
+.code-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  resize: none;
+  overflow: auto;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--accent);
+}
+
+.code-input::selection {
+  background: rgb(41 173 255 / 30%);
+}
+
+/* autocomplete */
+
+.code-complete {
+  position: absolute;
+  z-index: 20;
+  width: 340px;
+  background: var(--panel);
+  border: 1px solid #3a4150;
+  border-radius: 8px;
+  box-shadow: 0 14px 36px rgb(0 0 0 / 55%);
+}
+
+.code-complete[hidden] {
+  display: none;
+}
+
+/* The list scrolls; the description below it stays put. */
+.complete-list {
+  max-height: 228px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.complete-doc {
+  padding: 6px 9px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.complete-doc[hidden] {
+  display: none;
+}
+
+.complete-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.complete-item.selected {
+  background: rgb(41 173 255 / 20%);
+}
+
+.complete-item:hover {
+  background: rgb(41 173 255 / 12%);
+}
+
+.complete-icon {
+  flex: none;
+  width: 14px;
+  text-align: center;
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+.kind-function,
+.kind-method {
+  color: #29adff;
+}
+
+.kind-keyword {
+  color: #ff77a8;
+}
+
+.kind-constant {
+  color: #ffec27;
+}
+
+.kind-asset {
+  color: #00e436;
+}
+
+.kind-field,
+.kind-local {
+  color: var(--muted);
+}
+
+.complete-name {
+  color: var(--text);
+}
+
+.complete-sig {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.checkbox-row input {
+  width: auto;
+}
+
+.tok-keyword {
+  color: #ff77a8;
+}
+
+.tok-string {
+  color: #00e436;
+}
+
+.tok-comment {
+  color: #5f6b82;
+  font-style: italic;
+}
+
+.tok-number {
+  color: #ffa300;
+}
+
+.tok-builtin {
+  color: #ffec27;
+}
+
+.tok-engine {
+  color: #29adff;
+}
+
+/* The name being declared after `function`, including a dotted one. */
+.tok-fn {
+  color: #7ee0d0;
+}
+
+/* Any other name called like a function. Muted, so it reads as structure
+   rather than competing with the engine's own API. */
+.tok-call {
+  color: #c8b6e8;
+}
+
+.tok-self {
+  color: #ffa8d8;
+  font-style: italic;
+}
+
+/* ---- overlays painted on top of tokens -------------------------------- */
+
+.ovl-match {
+  border-radius: 2px;
+  background: rgb(255 236 39 / 22%);
+  box-shadow: 0 0 0 1px rgb(255 236 39 / 30%);
+}
+
+.ovl-match-current {
+  background: rgb(255 163 0 / 45%);
+  box-shadow: 0 0 0 1px rgb(255 163 0 / 70%);
+}
+
+.ovl-bracket {
+  border-radius: 2px;
+  background: rgb(41 173 255 / 28%);
+  box-shadow: 0 0 0 1px rgb(41 173 255 / 55%);
+}
+
+/* ---- game panel ------------------------------------------------------ */
+
+.game-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.game-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  padding: 8px 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.game-stage {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  overflow: auto;
+}
+
+.game-frame {
+  position: relative;
+}
+
+.game-canvas {
+  display: block;
+  max-width: 100%;
+  image-rendering: pixelated;
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 12px 40px rgb(0 0 0 / 45%);
+}
+
+.game-canvas:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  background: rgb(20 22 28 / 88%);
+  border-radius: 4px;
+}
+
+.game-overlay[hidden] {
+  display: none;
+}
+
+.game-error {
+  margin-top: 14px;
+  padding: 12px 14px;
+  max-width: 900px;
+  background: #26141b;
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+}
+
+.game-error[hidden] {
+  display: none;
+}
+
+.game-error h3 {
+  color: var(--danger);
+  margin-bottom: 6px;
+}
+
+.game-error pre {
+  margin: 0;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  color: #ffc9d5;
+}
+
+.error-source {
+  margin-top: 12px;
+  border: 1px solid rgb(255 0 77 / 30%);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #12141a;
+}
+
+.error-file {
+  padding: 5px 10px;
+  font-size: 11px;
+  color: var(--muted);
+  background: #1a1d24;
+  border-bottom: 1px solid rgb(255 0 77 / 20%);
+}
+
+.error-line {
+  display: flex;
+  gap: 10px;
+  padding: 1px 10px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre;
+}
+
+.error-line.offending {
+  background: rgb(255 0 77 / 15%);
+}
+
+.error-lineno {
+  flex: none;
+  width: 28px;
+  text-align: right;
+  color: #5f6b82;
+}
+
+.error-line.offending .error-lineno {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.error-code {
+  color: var(--text);
+  overflow-x: auto;
+}
+
+/* ---- modals and menus ------------------------------------------------ */
+
+/* Above Blockly's toolbox and flyout (z-index 70), which sit inside a tab. */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  background: rgb(0 0 0 / 55%);
+}
+
+.modal-box {
+  min-width: 280px;
+  max-width: 460px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 20px 60px rgb(0 0 0 / 55%);
+}
+
+.modal-box h2 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.modal-body p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.context-menu {
+  position: fixed;
+  z-index: 1010;
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  padding: 4px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 50%);
+}
+
+.context-menu button {
+  border: none;
+  background: none;
+  text-align: left;
+  border-radius: 5px;
+}
+
+.context-menu button:hover {
+  background: var(--panel-2);
+}
+/* ---- docs ------------------------------------------------------------ */
+
+.docs-panel {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+
+.docs-nav {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+}
+
+.docs-search-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.docs-count {
+  margin: 0;
+}
+
+.docs-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 8px;
+}
+
+.docs-nav-list h3 {
+  margin: 10px 0 4px 6px;
+}
+
+.docs-nav-list h3:first-child {
+  margin-top: 0;
+}
+
+.docs-nav-item {
+  padding: 4px 8px;
+  text-align: left;
+  font-size: 12px;
+  background: none;
+  border-color: transparent;
+  color: var(--muted);
+}
+
+.docs-nav-item:hover:not(:disabled) {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+/* The manual scrolls here, inside the panel -- never the window. */
+.docs-content {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 22px 28px 60px;
+}
+
+.doc-section {
+  max-width: 760px;
+  padding-bottom: 26px;
+  margin-bottom: 26px;
+  border-bottom: 1px solid var(--border);
+}
+
+.doc-section:last-child {
+  border-bottom: none;
+}
+
+.doc-section h2 {
+  margin: 0 0 4px;
+  font-size: 17px;
+}
+
+.doc-blurb {
+  margin: 0 0 16px;
+  color: var(--muted);
+}
+
+.doc-block h4 {
+  margin: 18px 0 6px;
+  font-size: 13px;
+}
+
+.doc-block p,
+.doc-block li {
+  margin: 6px 0;
+  line-height: 1.65;
+}
+
+.doc-block ul {
+  margin: 6px 0;
+  padding-left: 20px;
+}
+
+.docs-content code {
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: #12141a;
+  border: 1px solid var(--border);
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 11.5px;
+}
+
+/* Long samples scroll inside their own box, not the page. */
+.doc-code {
+  margin: 10px 0;
+  padding: 10px 12px;
+  overflow-x: auto;
+  /* Matches the two spaces the markdown build writes, so a sample reads the
+     same in the app and in docs/. */
+  tab-size: 2;
+  background: #101219;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  line-height: 1.55;
+}
+
+.doc-code code {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 12px;
+  white-space: pre;
+}
+
+.doc-table-wrap {
+  margin: 10px 0;
+  overflow-x: auto;
+}
+
+.doc-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.doc-table th,
+.doc-table td {
+  padding: 5px 10px;
+  text-align: left;
+  border: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.doc-table th {
+  background: var(--panel);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.doc-entry {
+  padding: 10px 0 12px;
+  border-top: 1px solid var(--border);
+}
+
+.doc-entry-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.doc-name {
+  color: var(--accent);
+  background: none !important;
+  border: 0 !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+  font-weight: 650;
+}
+
+.doc-sig {
+  color: var(--muted);
+  background: none !important;
+  border: 0 !important;
+  padding: 0 !important;
+}
+
+.doc-returns {
+  font-size: 11px;
+  color: var(--ok);
+}
+
+.doc-summary {
+  margin: 5px 0 0;
+  line-height: 1.6;
+}
+
+.doc-detail {
+  margin: 5px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.docs-empty {
+  margin: 0;
+}
+
+.blocked-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+/* ---- sprite import ---------------------------------------------------- */
+
+.import-body {
+  min-width: 380px;
+}
+
+.import-preview-wrap {
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: repeating-conic-gradient(#1a1d24 0 25%, #20242d 0 50%) 50% / 16px 16px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.import-preview {
+  image-rendering: pixelated;
+}
+
+.asset-group.drop-target {
+  outline: 2px dashed var(--accent);
+  outline-offset: -3px;
+  background: rgb(41 173 255 / 8%);
+}
+
+.tile-readout {
+  padding: 6px 8px;
+  border-radius: 5px;
+  background: #12141a;
+  border: 1px solid var(--border);
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.readout-warn {
+  color: var(--danger);
+}
+
+/* ---- explorer (Roblox style) ------------------------------------------- */
+
+.explorer-tree {
+  padding: 6px 4px;
+  font-size: 12px;
+}
+
+.explorer-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 6px 3px calc(6px + var(--depth, 0) * 14px);
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.explorer-row:hover {
+  background: var(--panel-2);
+}
+
+.explorer-service > .asset-name {
+  font-weight: 600;
+}
+
+.explorer-service > .asset-icon {
+  color: var(--accent);
+}
+
+.explorer-folder > .asset-icon {
+  color: var(--muted);
+}
+
+.explorer-derived {
+  opacity: 0.85;
+}
+
+.explorer-derived .asset-name {
+  color: var(--muted);
+}
+
+.explorer-chevron {
+  width: 10px;
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.explorer-chevron.hidden {
+  visibility: hidden;
+}
+
+.explorer-row .mini {
+  margin-left: auto;
+  visibility: hidden;
+}
+
+.explorer-row:hover .mini {
+  visibility: visible;
+}
+
+.explorer-row.dragging {
+  opacity: 0.5;
+}
+
+.explorer-row.drop-target {
+  outline: 2px dashed var(--accent);
+  outline-offset: -2px;
+  background: rgb(41 173 255 / 8%);
+}
+
+.paradigm-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.paradigm-option {
+  align-items: flex-start;
+}
+
+.paradigm-option > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.instance-name {
+  font-family: ui-monospace, Consolas, monospace;
+}
+
+.project-settings h3 {
+  margin: 10px 0 2px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.project-settings h3:first-child {
+  margin-top: 0;
+}
+
+/* ---- docs: Luau / Python switch ------------------------------------------ */
+
+.docs-language {
+  display: flex;
+  gap: 4px;
+}
+
+.docs-language button {
+  flex: 1;
+  padding: 3px 6px;
+  font-size: 11px;
+}
+
+/* ---- block editor (Scratch-style) ------------------------------------- */
+
+.block-editor {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.block-editor .code-header {
+  border-bottom: 1px solid var(--border);
+}
+
+.block-workspace {
+  min-height: 0;
+  min-width: 0;
+}
+
+.block-editor.show-code {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 38%);
+}
+
+.block-editor.show-code .code-header {
+  grid-column: 1 / -1;
+}
+
+.block-editor .code-editor {
+  border-left: 1px solid var(--border);
+}
+
+.block-editor .injectionDiv {
+  border: none;
+}
+
+.object-script {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  min-width: 0;
+}
+
+.object-script > .code-editor,
+.object-script > .block-editor {
+  grid-row: 2;
+}
+
+.object-script > .code-editor:only-child,
+.object-script > .block-editor:only-child {
+  grid-row: 1 / -1;
+}
+
+.start-from-blocks {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.block-code {
+  margin: 0;
+  padding: 10px 14px;
+  overflow: auto;
+  font-size: 12px;
+  line-height: 1.55;
+  border-left: 1px solid var(--border);
+}

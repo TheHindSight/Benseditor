@@ -1,0 +1,220 @@
+{
+  "name": "benseditor",
+  "displayName": "Benseditor",
+  "description": "A GameMaker-style 2D game engine for Python, built into VS Code.",
+  "version": "0.1.0",
+  "publisher": "benseditor",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Visualization",
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "workspaceContains:benseditor.json"
+  ],
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "benseditor.sprite",
+        "displayName": "Benseditor Sprite Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.bsprite"
+          }
+        ],
+        "priority": "default"
+      },
+      {
+        "viewType": "benseditor.room",
+        "displayName": "Benseditor Room Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.broom"
+          }
+        ],
+        "priority": "default"
+      },
+      {
+        "viewType": "benseditor.object",
+        "displayName": "Benseditor Object Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.bobject"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "benseditor",
+          "title": "Benseditor",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "benseditor": [
+        {
+          "id": "benseditor.assets",
+          "name": "Assets",
+          "contextualTitle": "Benseditor"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "benseditor.assets",
+        "contents": "No Benseditor project in this folder.\n[Create Game Project](command:benseditor.newProject)"
+      }
+    ],
+    "commands": [
+      {
+        "command": "benseditor.newProject",
+        "title": "Benseditor: Create Game Project"
+      },
+      {
+        "command": "benseditor.run",
+        "title": "Benseditor: Run Game",
+        "icon": "$(play)"
+      },
+      {
+        "command": "benseditor.stop",
+        "title": "Benseditor: Stop Game",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "benseditor.newSprite",
+        "title": "Benseditor: New Sprite",
+        "icon": "$(add)"
+      },
+      {
+        "command": "benseditor.newObject",
+        "title": "Benseditor: New Object",
+        "icon": "$(add)"
+      },
+      {
+        "command": "benseditor.newRoom",
+        "title": "Benseditor: New Room",
+        "icon": "$(add)"
+      },
+      {
+        "command": "benseditor.newScript",
+        "title": "Benseditor: New Script",
+        "icon": "$(add)"
+      },
+      {
+        "command": "benseditor.installEngine",
+        "title": "Benseditor: Install / Update Python Engine"
+      },
+      {
+        "command": "benseditor.refreshAssets",
+        "title": "Benseditor: Refresh Assets",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "benseditor.openScript",
+        "title": "Benseditor: Open Object Script"
+      },
+      {
+        "command": "benseditor.deleteAsset",
+        "title": "Delete"
+      },
+      {
+        "command": "benseditor.renameAsset",
+        "title": "Rename"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "benseditor.run",
+          "when": "view == benseditor.assets && !benseditor.running",
+          "group": "navigation@1"
+        },
+        {
+          "command": "benseditor.stop",
+          "when": "view == benseditor.assets && benseditor.running",
+          "group": "navigation@1"
+        },
+        {
+          "command": "benseditor.refreshAssets",
+          "when": "view == benseditor.assets",
+          "group": "navigation@2"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "benseditor.newSprite",
+          "when": "view == benseditor.assets && viewItem == group:sprites",
+          "group": "inline"
+        },
+        {
+          "command": "benseditor.newObject",
+          "when": "view == benseditor.assets && viewItem == group:objects",
+          "group": "inline"
+        },
+        {
+          "command": "benseditor.newRoom",
+          "when": "view == benseditor.assets && viewItem == group:rooms",
+          "group": "inline"
+        },
+        {
+          "command": "benseditor.newScript",
+          "when": "view == benseditor.assets && viewItem == group:scripts",
+          "group": "inline"
+        },
+        {
+          "command": "benseditor.openScript",
+          "when": "view == benseditor.assets && viewItem == asset:object",
+          "group": "1_open"
+        },
+        {
+          "command": "benseditor.renameAsset",
+          "when": "view == benseditor.assets && viewItem =~ /^asset:/",
+          "group": "7_modify"
+        },
+        {
+          "command": "benseditor.deleteAsset",
+          "when": "view == benseditor.assets && viewItem =~ /^asset:/",
+          "group": "7_modify"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Benseditor",
+      "properties": {
+        "benseditor.pythonPath": {
+          "type": "string",
+          "default": "",
+          "description": "Python interpreter used to run games. Leave empty to auto-detect (py -3 on Windows, python3 elsewhere)."
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "benseditor.run",
+        "key": "f5",
+        "when": "benseditor.projectOpen && !inDebugMode"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "vscode:prepublish": "node esbuild.mjs --production",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.90.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.6.0"
+  }
+}

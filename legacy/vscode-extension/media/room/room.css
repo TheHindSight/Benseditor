@@ -1,0 +1,170 @@
+#app {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) 200px;
+  height: 100vh;
+}
+
+#objects {
+  padding: 8px;
+  overflow-y: auto;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+}
+
+#object-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.object-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 4px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  font-size: 12px;
+  width: 100%;
+}
+
+.object-entry:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.object-entry.selected {
+  background: var(--vscode-list-activeSelectionBackground);
+  color: var(--vscode-list-activeSelectionForeground);
+  border-color: var(--accent);
+}
+
+.object-entry canvas {
+  image-rendering: pixelated;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.object-entry span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty-note {
+  font-size: 11px;
+  opacity: 0.6;
+  line-height: 1.4;
+}
+
+#stage {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+#canvas-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+#view {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+#status {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 4px 10px;
+  font-size: 11px;
+  border-top: 1px solid var(--border);
+  background: var(--panel);
+}
+
+#status label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+#pos,
+#zoom-label {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+  min-width: 54px;
+}
+
+#hint {
+  opacity: 0.55;
+}
+
+#sidebar {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+}
+
+#sidebar section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 34px 1fr 18px 1fr;
+  align-items: center;
+  gap: 5px;
+}
+
+.row:has(> :nth-child(2):last-child) {
+  grid-template-columns: 42px 1fr;
+}
+
+.value {
+  font-size: 12px;
+  opacity: 0.9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.button-row {
+  display: flex;
+  gap: 4px;
+}
+
+.button-row button {
+  flex: 1;
+  font-size: 11px;
+}
+
+#banner {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  background: var(--vscode-inputValidation-errorBackground, #5a1d1d);
+  border: 1px solid var(--vscode-inputValidation-errorBorder, #be1100);
+}

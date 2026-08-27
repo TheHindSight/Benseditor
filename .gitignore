@@ -1,0 +1,16 @@
+node_modules/
+out/
+*.vsix
+__pycache__/
+*.egg-info/
+.venv/
+dist/
+build/
+
+# single-file editor build output
+dist-single/
+public/player.js
+public/player.py.js
+.single-build/
+release/
+test-output/

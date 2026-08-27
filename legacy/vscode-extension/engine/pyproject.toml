@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "benseditor-engine"
+version = "0.1.0"
+description = "GameMaker-style 2D game engine runtime for Benseditor projects"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "moderngl>=5.10",
+    "pyglet>=2.0",
+    "pillow>=10.1",
+    "numpy>=1.24",
+]
+
+[project.scripts]
+benseditor = "benseditor.run:main"
+
+[tool.setuptools.packages.find]
+include = ["benseditor*"]

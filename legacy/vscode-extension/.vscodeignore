@@ -1,0 +1,8 @@
+.vscode/**
+src/**
+out/**/*.map
+esbuild.mjs
+tsconfig.json
+node_modules/**
+**/__pycache__/**
+engine/**/*.egg-info/**
