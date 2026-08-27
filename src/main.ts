@@ -2,6 +2,7 @@
 // (the single-file editor) still get the stylesheet.
 import './style.css';
 import { buildDashProject } from './demo/dash';
+import { buildGeometryDashProject } from './demo/gd';
 import { buildSnakeProject } from './demo/snake';
 import { buildStarterProject } from './demo/starter';
 import { buildBlankProject } from './project/create';
@@ -248,6 +249,7 @@ async function doNewProject(): Promise<void> {
     el('option', { value: 'demo', text: 'Coin collector — the walkthrough demo' }),
     el('option', { value: 'snake', text: 'Snake — a complete little game' }),
     el('option', { value: 'dash', text: 'Dash — a Geometry Dash-style runner, in Python' }),
+    el('option', { value: 'gd', text: 'Geometry Dash — the full clone, in Python' }),
   ) as HTMLSelectElement;
   const paradigm = paradigmChooser('gamemaker');
   const language = languageChooser('luau');
@@ -256,7 +258,7 @@ async function doNewProject(): Promise<void> {
   // Each demo is written in one language; only a blank project chooses.
   const syncLanguage = () => {
     const blank = template.value === 'blank';
-    const forced = template.value === 'dash' ? 'python' : 'luau';
+    const forced = template.value === 'dash' || template.value === 'gd' ? 'python' : 'luau';
     languageNote.textContent = `This demo is written in ${forced === 'python' ? 'Python' : 'Luau'}.`;
     for (const input of language.element.querySelectorAll('input')) {
       input.disabled = !blank;
@@ -293,6 +295,8 @@ async function doNewProject(): Promise<void> {
         ? 'Snake'
         : template.value === 'dash'
           ? 'Dash'
+          : template.value === 'gd'
+            ? 'Geometry Dash'
           : template.value === 'demo'
             ? 'Demo Game'
             : 'Untitled';
@@ -306,6 +310,8 @@ async function doNewProject(): Promise<void> {
       ? buildSnakeProject
       : template.value === 'dash'
         ? buildDashProject
+        : template.value === 'gd'
+          ? buildGeometryDashProject
         : template.value === 'demo'
           ? buildStarterProject
           : buildBlankProject;
