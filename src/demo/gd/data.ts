@@ -23,6 +23,7 @@ import gdCodec from './scripts/gd_codec.py?raw';
 import gdTiles from './scripts/gd_tiles.py?raw';
 import gdStore from './scripts/gd_store.py?raw';
 import gdLevel from './scripts/gd_level.py?raw';
+import gdEditor from './scripts/gd_editor.py?raw';
 import gdphys from './scripts/gdphys.py?raw';
 import ui from './scripts/ui.py?raw';
 import progress from './scripts/progress.py?raw';
@@ -38,6 +39,7 @@ import objLevels from './scripts/obj_levels.py?raw';
 import objIcon from './scripts/obj_icon.py?raw';
 import objHud from './scripts/obj_hud.py?raw';
 import objEnd from './scripts/obj_end.py?raw';
+import objEditor from './scripts/obj_editor.py?raw';
 import objLevel from './scripts/obj_level.py?raw';
 import objStart from './scripts/obj_start.py?raw';
 import objPlayer from './scripts/obj_player.py?raw';
@@ -72,6 +74,7 @@ export const GD_SCRIPTS: { name: string; source: string }[] = [
   { name: 'gd_store', source: gdStore },
   { name: 'gd_level', source: gdLevel },
   { name: 'gd_levels', source: builtInPython() },
+  { name: 'gd_editor', source: gdEditor },
   { name: 'ui', source: ui },
   { name: 'progress', source: progress },
   { name: 'run', source: run },
@@ -116,6 +119,7 @@ export const GD_OBJECTS: { def: ObjectFile; source: string }[] = [
   object({ name: 'obj_icon', source: objIcon, depth: -500, visible: false }),
   object({ name: 'obj_hud', source: objHud, depth: -500, visible: false }),
   object({ name: 'obj_end', source: objEnd, depth: -500, visible: false }),
+  object({ name: 'obj_editor', source: objEditor, depth: -500, visible: false }),
   object({ name: 'obj_level', source: objLevel, depth: -400, visible: false }),
   object({ name: 'obj_start', source: objStart, visible: false }),
 
@@ -177,7 +181,7 @@ export const GD_ROOMS: RoomFile[] = [
     [place('inst_hud', 'obj_hud', 0, 0, 'hud'), place('inst_level', 'obj_level', 0, 0, 'level')],
     [levelLayer(LAYER_PLAY)],
   ),
-  room('rm_editor', ROOM_W, ROOM_H, [], [levelLayer(LAYER_EDIT)]),
+  room('rm_editor', ROOM_W, ROOM_H, [place('inst_editor', 'obj_editor', 0, 0, 'editor')], [levelLayer(LAYER_EDIT)]),
 ];
 
 export const GD_START_ROOM = 'rm_menu';

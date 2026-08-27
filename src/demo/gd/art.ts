@@ -696,7 +696,9 @@ function buildSprites(): SpriteFile[] {
     FULL_30,
   );
 
-  const spike = sprite('spr_spike', 30, 30, [frameFromAscii(spikeRows(), { w: WHITE, k: BLACK })], rect(5, 10, 24, 29));
+  // A forgiving hazard box, as in GD: a narrow column up the middle so grazing
+  // a spike's shoulder is survivable. Death is only the tip-to-base centre.
+  const spike = sprite('spr_spike', 30, 30, [frameFromAscii(spikeRows(), { w: WHITE, k: BLACK })], rect(12, 20, 17, 29));
   const padSprite = sprite(
     'spr_pad', 30, 30,
     PAD_COLOURS.map((colour) => frameFromAscii(padRows(), { c: colour, w: WHITE, k: BLACK })),
