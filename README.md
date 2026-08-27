@@ -777,7 +777,8 @@ Everything above works and is covered by thirty-two suites, all run by `npm test
 | `test:gd-logic` | 124 | The GD menu/HUD/progress toolkit and scene state machines, headless |
 | `test:gd-levels` | 4 | A bot plays the built-in levels: one completed end to end, all load and play |
 | `test:gd-editor` | 93 | The level editor's document model: place/erase/undo, coins, name field, save with read-back, verification |
-| `test:gd-menu` / `-icon` / `-play` / `-end` / `-editor-browser` | — | The menu, icon colours, a played level, the end screen and the editor in Chromium |
+| `test:gd-menu` / `-icon` / `-play` / `-end` | 18 / 17 / 23 / 9 | The menu, icon colours, a played level and the end screen in Chromium |
+| `test:gd-editor-browser` | 17 | The level editor in Chromium: place a block, name, save, verify, the menu's badge |
 | `test:docs` | 36 | The manual against the engine in both directions, both languages' examples, and that the two engines expose identical names |
 | `test:dev` | 4 | That `npm run dev` actually boots the app |
 | `test:browser` | 167 | The editors and the game in real Chromium, reading pixels back out of the WebGL canvas |
