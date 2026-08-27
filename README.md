@@ -12,7 +12,9 @@ A GameMaker-style 2D game engine scripted in **Luau or Python** — typed, or
 snapped together from **Scratch-style blocks** that compile to either. With one
 switch in Project settings it is a Roblox-style one instead: an Explorer tree
 of services and folders in the editor, and `Parent` / `Instance.new` /
-`FindFirstChild` at runtime.
+`FindFirstChild` at runtime. The **Geometry Dash** template shows how far the
+Python side goes: a full GD clone — eight gamemodes, an in-game level editor,
+saved custom levels — written entirely in object scripts.
 
 The whole editor builds to **one HTML file** you open by double-clicking — no
 install, no server, no toolchain. It also runs as an Electron desktop app or a
@@ -435,6 +437,7 @@ src/luau/
   roblox.luau             Signal, task, and game:GetService
 src/python/
   prelude.py  roblox.py   the same engine in Python, for MicroPython
+src/demo/gd/               the Geometry Dash clone: constants/levels/art/data + scripts/*.py
 src/vendor/
   micropython.js          MicroPython WASM, wasm embedded (generated, do not edit)
 src/engine/
@@ -702,11 +705,40 @@ full-screen tilemap is effectively free:
 | **Blank** | One black room, runnable immediately — in Luau or Python, as code or blocks |
 | **Coin collector** | The walkthrough demo — sprites, walls, tiles, HUD, DataStore |
 | **Snake** | A complete little game in a single object script |
-| **Dash** | A Geometry Dash-style runner, written in Python: a tile-layer level ten screens wide, a camera (`view_set_size` + `view_set`), spikes, pits, platforms, attempts and a progress bar |
+| **Dash** | A small Geometry Dash-style runner in Python: a tile-layer level, a camera, spikes, attempts and a progress bar |
+| **Geometry Dash** | The full clone in Python — see below |
 
 It warns before discarding unsaved work, and deliberately forgets the previous
 folder so **Save** asks where to put the new project rather than overwriting
 the old one.
+
+### Geometry Dash
+
+The **Geometry Dash** template is the largest thing built on the engine, and
+all of it is Python object scripts (`src/demo/gd/`). It has the real game's
+physics — the constants come from the 2.2 decompile, converted to the engine's
+fixed 60 Hz step so a jump's height and length match the original — across all
+eight gamemodes (cube, ship, ball, UFO, wave, robot, spider, swing), with jump
+pads, orbs, gravity / speed / size / mode portals, mini mode, practice-mode
+checkpoints and secret coins. A menu drives level select, an icon screen (pick
+the cube's colours, saved between sessions), three built-in levels, and an
+**in-game level editor**: place blocks, spikes, pads, orbs and portals on a
+grid with the mouse, name the level, and save it in the browser. A custom
+level is **unverified** until its creator completes it from the editor in a
+full run from the start — only then will the menu let anyone play it, exactly
+as Geometry Dash gates its own levels.
+
+Everything is proven headlessly: `test:gd-physics` runs the 21 measured
+scenarios (jump apexes per speed, the ship hold/release curve, wave slopes,
+every pad and orb impulse, the spike hitbox) against the real engine;
+`test:gd-levels` drives a bot through the built-in levels (one is completed end
+to end, the others load, spawn every mechanic and play a real stretch);
+`test:gd-codec` / `test:gd-spawner` / `test:gd-editor` cover the level format,
+the streaming object spawner and the editor's document model; the browser
+suites play the menu, icon screen, a level and the editor in Chromium. There
+is no audio (the engine has none), so the "beat" is visual; hitboxes are
+axis-aligned; level names are typed from the letter keys, since the engine has
+no text-input API.
 
 Snake is worth reading: the whole game is one `obj_snake` script that keeps its
 body as an array of grid cells and draws it with `draw_sprite_ext`, rather than
@@ -723,7 +755,7 @@ work.
 
 ## Status
 
-Everything above works and is covered by twenty-two suites, all run by `npm test`:
+Everything above works and is covered by thirty-two suites, all run by `npm test`:
 
 | Suite | Checks | What it covers |
 | --- | --- | --- |
@@ -739,6 +771,13 @@ Everything above works and is covered by twenty-two suites, all run by `npm test
 | `test:blocks` | 172 | Every block has both generators; fixtures generate Luau and Python that run identically on both engines |
 | `test:templates` | 16 | Every object template registered, started and stepped on both engines |
 | `test:dash` | 19 | Plays the Dash demo in Chromium: runs, dies on the first spike, restarts, jumps, draws its HUD |
+| `test:gd-physics` | 178 | Geometry Dash physics: the 21 measured scenarios across all eight gamemodes, pads, orbs, portals |
+| `test:gd-codec` | 171 | The GD level format: encode/decode round trips, validation, the balance checker |
+| `test:gd-spawner` | 73 | The streaming object spawner: window bounds, one spawn each, restart, tile sync |
+| `test:gd-logic` | 124 | The GD menu/HUD/progress toolkit and scene state machines, headless |
+| `test:gd-levels` | 4 | A bot plays the built-in levels: one completed end to end, all load and play |
+| `test:gd-editor` | 93 | The level editor's document model: place/erase/undo, coins, name field, save with read-back, verification |
+| `test:gd-menu` / `-icon` / `-play` / `-end` / `-editor-browser` | — | The menu, icon colours, a played level, the end screen and the editor in Chromium |
 | `test:docs` | 36 | The manual against the engine in both directions, both languages' examples, and that the two engines expose identical names |
 | `test:dev` | 4 | That `npm run dev` actually boots the app |
 | `test:browser` | 167 | The editors and the game in real Chromium, reading pixels back out of the WebGL canvas |
