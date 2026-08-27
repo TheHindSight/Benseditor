@@ -391,6 +391,16 @@ def run_tick(player=None):
     if player is None:
         return True
 
+    # Bridge from the physics: gdphys sets `won` / `dead` on the player
+    # instance. Both targets are one-shot (guarded by s["finished"] and
+    # s["dead"]), so this stays correct if the player also calls them.
+    if getattr(player, "won", False):
+        run_finish(player)
+        return False
+    if getattr(player, "dead", False):
+        run_die(player)
+        return False
+
     pct = _percent(player)
     s["pct"] = pct
     if pct > s["run_best"]:
