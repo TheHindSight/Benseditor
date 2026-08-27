@@ -63,9 +63,15 @@ def draw(self):
     if not self.visible:
         return
     # Draw the icon in the player's chosen colours (image_blend tinting), with
-    # the gamemode's sprite and gd_animate's rotation/scale.
-    primary, secondary, shape = icon_settings()
-    icon_draw_mode(
+    # the gamemode's sprite and gd_animate's rotation/scale. Falls back to the
+    # plain sprite where the icon scripts are not loaded (the physics tests).
+    draw_mode = globals().get("icon_draw_mode")
+    settings = globals().get("icon_settings")
+    if draw_mode is None or settings is None:
+        self.draw_self()
+        return
+    primary, secondary, shape = settings()
+    draw_mode(
         self.x, self.y, self.mode, primary, secondary, shape,
         self.image_xscale, self.image_yscale, self.image_angle, self.image_alpha,
     )
