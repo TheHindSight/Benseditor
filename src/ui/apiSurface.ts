@@ -74,6 +74,9 @@ export const ENGINE_FUNCTIONS: ApiEntry[] = documented([
   { name: 'game_end', kind: 'function', signature: '()', doc: 'Stop the game.' },
   { name: 'view_set', kind: 'function', signature: '(x, y)', doc: 'Scroll the visible area.' },
   { name: 'view_get', kind: 'function', signature: '()', doc: 'Returns x, y of the view.' },
+  { name: 'view_set_size', kind: 'function', signature: '(width, height)' },
+  { name: 'view_width', kind: 'function', signature: '()' },
+  { name: 'view_height', kind: 'function', signature: '()' },
 
   // input
   { name: 'keyboard_check', kind: 'function', signature: '(key)', doc: 'True while the key is held. e.g. "left", "space", "a".' },

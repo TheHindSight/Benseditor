@@ -440,6 +440,8 @@ local current_room = nil
 local room_width_value = 0
 local room_height_value = 0
 local view_x, view_y = 0, 0
+-- The visible area's size; the room's size unless a game asks for a window.
+local view_width_value, view_height_value = 0, 0
 local room_change_request = nil
 local quit_requested = false
 
@@ -1097,6 +1099,21 @@ function view_get(): (number, number)
 	return view_x, view_y
 end
 
+--- The size of the visible area. It resets to the room's size on entering a
+--- room, so a scrolling game sets it in room_start.
+function view_set_size(width: number, height: number)
+	view_width_value = math.max(1, math.floor(width))
+	view_height_value = math.max(1, math.floor(height))
+end
+
+function view_width(): number
+	return view_width_value
+end
+
+function view_height(): number
+	return view_height_value
+end
+
 local function enter_room(name: string)
 	if current_room then
 		for _, inst in instances do
@@ -1157,6 +1174,8 @@ local function enter_room(name: string)
 	end)
 	room_width_value = room.width
 	room_height_value = room.height
+	view_width_value = room.width
+	view_height_value = room.height
 	view_x, view_y = 0, 0
 	order_dirty = true
 
@@ -1243,6 +1262,7 @@ function __reset()
 	current_room = nil
 	room_width_value = 0
 	room_height_value = 0
+	view_width_value, view_height_value = 0, 0
 	view_x, view_y = 0, 0
 	room_change_request = nil
 	quit_requested = false
@@ -1397,8 +1417,8 @@ local function draw_layer(layer)
 	local tw, th = set.tile_width, set.tile_height
 	local x0 = math.max(0, math.floor(view_x / tw))
 	local y0 = math.max(0, math.floor(view_y / th))
-	local x1 = math.min(layer.columns - 1, math.floor((view_x + room_width_value - 1) / tw))
-	local y1 = math.min(layer.rows - 1, math.floor((view_y + room_height_value - 1) / th))
+	local x1 = math.min(layer.columns - 1, math.floor((view_x + view_width_value - 1) / tw))
+	local y1 = math.min(layer.rows - 1, math.floor((view_y + view_height_value - 1) / th))
 
 	for ty = y0, y1 do
 		local row = ty * layer.columns
@@ -1713,13 +1733,13 @@ function __frame(input: string, dt: number?): (string, number, number, number, n
 		enter_room(target)
 	end
 
-	return payload, drawn, background, room_width_value, room_height_value, view_x, view_y, quit_requested
+	return payload, drawn, background, view_width_value, view_height_value, view_x, view_y, quit_requested
 end
 
 --- Frame metadata the host needs but that does not belong in the draw buffer.
 function __frame_info(): (number, number, number, number, number, number, boolean)
 	local background = if current_room then current_room.background else 0
-	return command_count, background, room_width_value, room_height_value, view_x, view_y, quit_requested
+	return command_count, background, view_width_value, view_height_value, view_x, view_y, quit_requested
 end
 
 --=============================================================================

@@ -100,7 +100,7 @@ export class GamePanel implements Panel {
       this.runtime.start();
       this.canvas.focus();
     } catch (error) {
-      this.fail(error instanceof Error ? (error.stack ?? error.message) : String(error));
+      this.fail(describeFailure(error));
     }
   }
 
@@ -187,4 +187,16 @@ export function locateError(message: string): { name: string; line: number } | n
   const python = /File "([^"<>]+)\.py", line (\d+)/g;
   for (let match = python.exec(message); match; match = python.exec(message)) last = match;
   return last ? { name: last[1], line: Number(last[2]) } : null;
+}
+
+/**
+ * What to show for a failed run. A Python exception's message is already a
+ * full traceback ending in the script and line, so the JavaScript frames
+ * under it would only bury that; a Luau error keeps its stack, which is
+ * where the script name and line live.
+ */
+export function describeFailure(error: unknown): string {
+  if (!(error instanceof Error)) return String(error);
+  if (error.name === 'PythonError') return error.message.trim();
+  return error.stack ?? error.message;
 }

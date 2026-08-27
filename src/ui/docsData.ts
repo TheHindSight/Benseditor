@@ -1480,6 +1480,43 @@ def step_end(self):
       origin: 'global',
     },
     {
+      name: 'view_set_size',
+      signature: '(width, height)',
+      summary: 'Sets the size of the visible area, for a room larger than the window.',
+      detail:
+        'The view is the whole room until a game says otherwise, and it resets to the ' +
+        'room’s size whenever a room is entered — so set it in `room_start`. The window ' +
+        'is sized to the view, and `view_set` scrolls it.',
+      example: `function obj.room_start(self)
+	view_set_size(480, 288)
+end
+
+function obj.step_end(self)
+	view_set(clamp(self.x - 140, 0, room_width() - view_width()), 0)
+end`,
+      pythonExample: `def room_start(self):
+    view_set_size(480, 288)
+
+
+def step_end(self):
+    view_set(clamp(self.x - 140, 0, room_width() - view_width()), 0)`,
+      origin: 'global',
+    },
+    {
+      name: 'view_width',
+      signature: '()',
+      returns: 'number',
+      summary: 'The width of the visible area, in pixels.',
+      origin: 'global',
+    },
+    {
+      name: 'view_height',
+      signature: '()',
+      returns: 'number',
+      summary: 'The height of the visible area, in pixels.',
+      origin: 'global',
+    },
+    {
       name: 'game_end',
       signature: '()',
       summary: 'Stops the game after this frame.',

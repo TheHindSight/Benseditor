@@ -57,6 +57,7 @@ export async function bootPlayer(hostFactory: ScriptHostFactory): Promise<void> 
     // Clicking anywhere gives the canvas focus back, so keys keep working.
     document.addEventListener('pointerdown', () => canvas.focus());
   } catch (error) {
-    fail(error instanceof Error ? (error.stack ?? error.message) : String(error));
+    if (error instanceof Error && error.name === 'PythonError') fail(error.message.trim());
+    else fail(error instanceof Error ? (error.stack ?? error.message) : String(error));
   }
 }

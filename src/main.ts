@@ -1,6 +1,7 @@
 // Imported rather than linked from index.html, so builds without an HTML entry
 // (the single-file editor) still get the stylesheet.
 import './style.css';
+import { buildDashProject } from './demo/dash';
 import { buildSnakeProject } from './demo/snake';
 import { buildStarterProject } from './demo/starter';
 import { buildBlankProject } from './project/create';
@@ -246,17 +247,20 @@ async function doNewProject(): Promise<void> {
     el('option', { value: 'blank', text: 'Blank — one black room' }),
     el('option', { value: 'demo', text: 'Coin collector — the walkthrough demo' }),
     el('option', { value: 'snake', text: 'Snake — a complete little game' }),
+    el('option', { value: 'dash', text: 'Dash — a Geometry Dash-style runner, in Python' }),
   ) as HTMLSelectElement;
   const paradigm = paradigmChooser('gamemaker');
   const language = languageChooser('luau');
   const scripting = scriptingChooser('code');
-  const languageNote = el('p', { class: 'muted small', hidden: true, text: 'The demo projects are written in Luau.' });
-  // The demos are Luau; only a blank project can start in Python.
+  const languageNote = el('p', { class: 'muted small', hidden: true, text: 'This demo is written in Luau.' });
+  // Each demo is written in one language; only a blank project chooses.
   const syncLanguage = () => {
     const blank = template.value === 'blank';
+    const forced = template.value === 'dash' ? 'python' : 'luau';
+    languageNote.textContent = `This demo is written in ${forced === 'python' ? 'Python' : 'Luau'}.`;
     for (const input of language.element.querySelectorAll('input')) {
       input.disabled = !blank;
-      if (!blank && input.value === 'luau') input.checked = true;
+      if (!blank && input.value === forced) input.checked = true;
     }
     for (const input of scripting.element.querySelectorAll('input')) {
       input.disabled = !blank;
@@ -285,7 +289,13 @@ async function doNewProject(): Promise<void> {
   template.addEventListener('change', () => {
     if (renamed) return;
     nameInput.value =
-      template.value === 'snake' ? 'Snake' : template.value === 'demo' ? 'Demo Game' : 'Untitled';
+      template.value === 'snake'
+        ? 'Snake'
+        : template.value === 'dash'
+          ? 'Dash'
+          : template.value === 'demo'
+            ? 'Demo Game'
+            : 'Untitled';
   });
 
   if (!(await modal('New project', body, 'Create'))) return;
@@ -294,9 +304,11 @@ async function doNewProject(): Promise<void> {
   const build =
     template.value === 'snake'
       ? buildSnakeProject
-      : template.value === 'demo'
-        ? buildStarterProject
-        : buildBlankProject;
+      : template.value === 'dash'
+        ? buildDashProject
+        : template.value === 'demo'
+          ? buildStarterProject
+          : buildBlankProject;
 
   const project =
     build === buildBlankProject ? buildBlankProject(name, language.value()) : build(name);

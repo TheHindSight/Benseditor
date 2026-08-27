@@ -191,6 +191,10 @@ local vx, vy = view_get()
 ok("view_set", vx == 12 and vy == 34)
 ok("view_get", vx == 12 and vy == 34, \`{vx},{vy}\`)
 view_set(0, 0)
+ok("view_width defaults to the room", view_width() == room_width())
+ok("view_height defaults to the room", view_height() == room_height())
+view_set_size(200, 100)
+ok("view_set_size", view_width() == 200 and view_height() == 100)
 
 -- instances --------------------------------------------------------------
 local a = instance_create(100, 100, "obj_base")

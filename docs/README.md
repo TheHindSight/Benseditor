@@ -2,7 +2,7 @@
 
 # Benseditor manual
 
-A 2D game engine with GameMaker’s shape, scripted in Luau or Python, running entirely in the browser. This is the same text the editor shows under **Docs** — press F1 in the app to search all 172 documented names. Samples are given in both languages; see *Python mode* for the mapping between them.
+A 2D game engine with GameMaker’s shape, scripted in Luau or Python, running entirely in the browser. This is the same text the editor shows under **Docs** — press F1 in the app to search all 175 documented names. Samples are given in both languages; see *Python mode* for the mapping between them.
 
 ## [Start here](start-here.md)
 

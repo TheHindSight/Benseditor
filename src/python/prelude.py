@@ -467,6 +467,8 @@ _current_room = None
 _room_width_value = 0
 _room_height_value = 0
 _view_x, _view_y = 0, 0
+# The visible area's size; the room's size unless a game asks for a window.
+_view_width_value, _view_height_value = 0, 0
 _room_change_request = None
 _quit_requested = False
 
@@ -1129,9 +1131,25 @@ def view_get():
     return _view_x, _view_y
 
 
+def view_set_size(width, height):
+    """The size of the visible area. It resets to the room's size on entering a
+    room, so a scrolling game sets it in room_start."""
+    global _view_width_value, _view_height_value
+    _view_width_value = max(1, int(math.floor(width)))
+    _view_height_value = max(1, int(math.floor(height)))
+
+
+def view_width():
+    return _view_width_value
+
+
+def view_height():
+    return _view_height_value
+
+
 def _enter_room(name):
     global _instances, _current_room, _room_width_value, _room_height_value
-    global _view_x, _view_y, _order_dirty
+    global _view_x, _view_y, _view_width_value, _view_height_value, _order_dirty
 
     if _current_room:
         for inst in _instances:
@@ -1174,6 +1192,8 @@ def _enter_room(name):
     room["layers"].sort(key=_layer_depth_descending)
     _room_width_value = room["width"]
     _room_height_value = room["height"]
+    _view_width_value = room["width"]
+    _view_height_value = room["height"]
     _view_x, _view_y = 0, 0
     _order_dirty = True
 
@@ -1267,6 +1287,7 @@ def __reset():
     a new one per run, so this is what makes a re-run a clean slate."""
     global _instances, _next_id, _order_dirty
     global _current_room, _room_width_value, _room_height_value, _view_x, _view_y
+    global _view_width_value, _view_height_value
     global _room_change_request, _quit_requested
     global _write_offset, _command_count, _draw_color, _draw_alpha
     global __API
@@ -1289,6 +1310,7 @@ def __reset():
     _current_room = None
     _room_width_value = 0
     _room_height_value = 0
+    _view_width_value, _view_height_value = 0, 0
     _view_x, _view_y = 0, 0
     _room_change_request = None
     _quit_requested = False
@@ -1428,8 +1450,8 @@ def _draw_layer(layer):
     floor = math.floor
     x0 = max(0, floor(_view_x / tw))
     y0 = max(0, floor(_view_y / th))
-    x1 = min(columns - 1, floor((_view_x + _room_width_value - 1) / tw))
-    y1 = min(layer["rows"] - 1, floor((_view_y + _room_height_value - 1) / th))
+    x1 = min(columns - 1, floor((_view_x + _view_width_value - 1) / tw))
+    y1 = min(layer["rows"] - 1, floor((_view_y + _view_height_value - 1) / th))
 
     tiles = layer["tiles"]
     first = tileset["first"]
@@ -1731,7 +1753,7 @@ def __frame_packed(input, dt=None):
         _enter_room(target)
 
     return "%d;%s;%s;%s;%s;%s;%d;%s" % (
-        drawn, background, _room_width_value, _room_height_value, _view_x, _view_y,
+        drawn, background, _view_width_value, _view_height_value, _view_x, _view_y,
         1 if _quit_requested else 0, payload,
     )
 
@@ -1739,7 +1761,7 @@ def __frame_packed(input, dt=None):
 def __frame_info():
     """Frame metadata the host needs but that does not belong in the draw buffer."""
     background = _current_room["background"] if _current_room else 0
-    return _command_count, background, _room_width_value, _room_height_value, _view_x, _view_y, _quit_requested
+    return _command_count, background, _view_width_value, _view_height_value, _view_x, _view_y, _quit_requested
 
 
 # =============================================================================

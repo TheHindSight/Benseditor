@@ -693,13 +693,14 @@ full-screen tilemap is effectively free:
 
 ## Starting a project
 
-**New** offers three templates:
+**New** offers four templates:
 
 | Template | What you get |
 | --- | --- |
-| **Blank** | One black room, runnable immediately |
+| **Blank** | One black room, runnable immediately — in Luau or Python, as code or blocks |
 | **Coin collector** | The walkthrough demo — sprites, walls, tiles, HUD, DataStore |
 | **Snake** | A complete little game in a single object script |
+| **Dash** | A Geometry Dash-style runner, written in Python: a tile-layer level ten screens wide, a camera (`view_set_size` + `view_set`), spikes, pits, platforms, attempts and a progress bar |
 
 It warns before discarding unsaved work, and deliberately forgets the previous
 folder so **Save** asks where to put the new project rather than overwriting
@@ -720,19 +721,21 @@ work.
 
 ## Status
 
-Everything above works and is covered by twenty suites, all run by `npm test`:
+Everything above works and is covered by twenty-two suites, all run by `npm test`:
 
 | Suite | Checks | What it covers |
 | --- | --- | --- |
 | `test:vendor` | 1 | That the vendored MicroPython matches the pinned package |
 | `test:engine` | 88 | Engine behaviour — events, collision, rooms, tiles, depth |
-| `test:api` | 180 | **Every scripting function, individually** |
+| `test:api` | 183 | **Every scripting function, individually** |
 | `test:tree` | 60 | The instance tree: parenting, lookup, cascade destroy, room changes, and that a flat world is unchanged |
 | `test:python-smoke` | 185 | Thirty scenes on the Python engine, including a 100-instance frame-time budget |
 | `test:engine-py` | 88 | The engine tests, same assertions, against the Python engine |
-| `test:api-py` | 180 | The per-function audit against the Python engine |
+| `test:api-py` | 183 | The per-function audit against the Python engine |
 | `test:python-syntax` | 107 | The Python tokeniser's invariants and the editor's Python rules |
 | `test:blocks` | 172 | Every block has both generators; fixtures generate Luau and Python that run identically on both engines |
+| `test:templates` | 16 | Every object template registered, started and stepped on both engines |
+| `test:dash` | 17 | Plays the Dash demo in Chromium: runs, dies on the first spike, restarts, jumps, draws its HUD |
 | `test:docs` | 36 | The manual against the engine in both directions, both languages' examples, and that the two engines expose identical names |
 | `test:dev` | 4 | That `npm run dev` actually boots the app |
 | `test:browser` | 167 | The editors and the game in real Chromium, reading pixels back out of the WebGL canvas |
@@ -755,7 +758,8 @@ been renamed away.
 
 Known limits: collision is axis-aligned boxes only (the `circle` and `precise`
 mask modes are stored but unused); the `collision` event fires per overlapping
-instance, so filter with `other:is_a(...)`; one camera, no view layers; no
+instance, so filter with `other:is_a(...)`; one camera (`view_set_size` and
+`view_set`), no view layers; no
 audio; text uses a canvas-rendered font, so it is slightly soft when scaled
 rather than crisply pixelated.
 
