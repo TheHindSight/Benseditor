@@ -11,7 +11,7 @@
 
 ### Key names
 
-Keys are lowercase strings. Letters and digits are themselves: `"a"`, `"7"`. The rest are `left`, `right`, `up`, `down`, `space`, `enter`, `escape`, `shift`, `ctrl`, `alt`, `tab`, `backspace`, `delete`, `home`, `end`, `pageup`, `pagedown`, `comma` and `period`. Names follow the physical key, so they do not change with the keyboard layout, and left and right modifiers report the same name.
+Keys are lowercase strings. Letters and digits are themselves: `"a"`, `"7"`. The rest are `left`, `right`, `up`, `down`, `space`, `enter`, `escape`, `shift`, `ctrl`, `alt`, `tab`, `backspace`, `delete`, `home`, `end`, `pageup`, `pagedown`, `comma`, `period`, `minus`, `equal`, `slash`, `semicolon`, `quote`, `bracketleft`, `bracketright` and `backquote`. Names follow the physical key, so they do not change with the keyboard layout, and left and right modifiers report the same name.
 
 ### Focus
 
@@ -33,9 +33,19 @@ True only on the step the key came up.
 
 True while a mouse button is down. "left" (the default), "right" or "middle".
 
+#### `mouse_check_button_pressed(button?)` → boolean
+
+True only on the step the button went down. "left" (the default), "right" or "middle".
+
+#### `mouse_check_button_released(button?)` → boolean
+
+True only on the step the button came up.
+
 #### `mouse_x()` → number
 
 Mouse x in room coordinates.
+
+The view offset is included, so the value compares directly with instance x/y while the view scrolls. Subtract `view_get()` for a position on screen.
 
 #### `mouse_y()` → number
 

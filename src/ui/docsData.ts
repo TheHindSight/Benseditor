@@ -709,8 +709,8 @@ const frameOrder: DocSection = {
   blocks: [
     {
       text:
-        'One `requestAnimationFrame` drives one step. Everything below happens in a single call ' +
-        'into the Luau VM, in this order:',
+        'The game steps `room_speed()` times a second — 60 unless the project says otherwise. ' +
+        'Everything below happens in a single call into the VM, in this order:',
       list: [
         'This frame’s keyboard and mouse state is applied.',
         '`UserInputService.InputBegan` fires for each key pressed this frame, `InputEnded` for each released.',
@@ -731,14 +731,15 @@ const frameOrder: DocSection = {
       ],
     },
     {
-      heading: 'Steps are frames',
+      heading: 'Fixed timestep',
       text:
-        'The loop runs one step per animation frame, so on a 144 Hz display it steps 144 times a ' +
-        'second. Anything counted in steps — alarms, `image_speed`, a counter you increment ' +
-        'yourself — therefore runs faster on a faster display. `RunService.Heartbeat` and ' +
-        '`task.wait` are given the real elapsed time (clamped to 0.25 s so a backgrounded tab ' +
-        'does not resume with an enormous delta), so use those if you need wall-clock timing. ' +
-        '`room_speed()` reports 60 as the nominal rate.',
+        'Steps happen on a fixed clock, not per animation frame: a 144 Hz display still steps ' +
+        '60 times a second, so anything counted in steps — alarms, `image_speed`, a counter you ' +
+        'increment yourself — runs at the same speed everywhere, and the delta handed to ' +
+        '`RunService.Heartbeat` and `task.wait` is a constant `1 / room_speed()`. When the ' +
+        'machine falls behind (a hitch, a backgrounded tab) at most three steps run before a ' +
+        'frame is drawn and the rest of the backlog is dropped, so the game slows down rather ' +
+        'than racing to catch up.',
     },
     {
       heading: 'Depth',
@@ -852,7 +853,7 @@ const instanceFields: DocSection = {
     },
     {
       name: 'depth',
-      summary: 'Draw order. Larger is further back. Seeded from the object.',
+      summary: 'Draw order. Larger is further back. Seeded from the object; assigning it re-sorts before the next draw.',
       origin: 'field',
     },
     {
@@ -1293,6 +1294,19 @@ const drawing: DocSection = {
       origin: 'global',
     },
     {
+      name: 'draw_text_transformed',
+      signature: '(x, y, text, xscale, yscale, angle, colour?)',
+      summary: 'Draws text scaled and rotated; big crisp text for titles and menus.',
+      detail:
+        'Each glyph is a sprite, so this costs the same as draw_text. Scaled text is ' +
+        '`string_width(text) * xscale` wide. Angle is degrees counter-clockwise, about (x, y).',
+      example: `local title = "READY"
+draw_text_transformed(240 - string_width(title) * 3 / 2, 40, title, 3, 3, 0, c_yellow)`,
+      pythonExample: `title = "READY"
+draw_text_transformed(240 - string_width(title) * 3 / 2, 40, title, 3, 3, 0, c_yellow)`,
+      origin: 'global',
+    },
+    {
       name: 'draw_rectangle',
       signature: '(x1, y1, x2, y2, outline)',
       summary: 'Draws a rectangle in the current colour and alpha.',
@@ -1460,10 +1474,10 @@ def step_end(self):
       name: 'room_speed',
       signature: '()',
       returns: 'number',
-      summary: 'The nominal steps per second, which is 60.',
+      summary: 'The steps per second — 60 unless the project settings say otherwise.',
       detail:
-        'A constant, useful for expressing durations in seconds. The loop actually steps once ' +
-        'per animation frame — see *The frame*.',
+        'Useful for expressing durations in seconds: `room_speed() * 3` is three seconds. The ' +
+        'game really does step this many times a second, whatever the display — see *The frame*.',
       origin: 'global',
     },
     {
@@ -1621,8 +1635,9 @@ const input: DocSection = {
       text:
         'Keys are lowercase strings. Letters and digits are themselves: `"a"`, `"7"`. The rest ' +
         'are `left`, `right`, `up`, `down`, `space`, `enter`, `escape`, `shift`, `ctrl`, `alt`, ' +
-        '`tab`, `backspace`, `delete`, `home`, `end`, `pageup`, `pagedown`, `comma` and ' +
-        '`period`. Names follow the physical key, so they do not change with the keyboard ' +
+        '`tab`, `backspace`, `delete`, `home`, `end`, `pageup`, `pagedown`, `comma`, ' +
+        '`period`, `minus`, `equal`, `slash`, `semicolon`, `quote`, `bracketleft`, ' +
+        '`bracketright` and `backquote`. Names follow the physical key, so they do not change with the keyboard ' +
         'layout, and left and right modifiers report the same name.',
     },
     {
@@ -1662,7 +1677,30 @@ const input: DocSection = {
       summary: 'True while a mouse button is down. "left" (the default), "right" or "middle".',
       origin: 'global',
     },
-    { name: 'mouse_x', signature: '()', returns: 'number', summary: 'Mouse x in room coordinates.', origin: 'global' },
+    {
+      name: 'mouse_check_button_pressed',
+      signature: '(button?)',
+      returns: 'boolean',
+      summary: 'True only on the step the button went down. "left" (the default), "right" or "middle".',
+      origin: 'global',
+    },
+    {
+      name: 'mouse_check_button_released',
+      signature: '(button?)',
+      returns: 'boolean',
+      summary: 'True only on the step the button came up.',
+      origin: 'global',
+    },
+    {
+      name: 'mouse_x',
+      signature: '()',
+      returns: 'number',
+      summary: 'Mouse x in room coordinates.',
+      detail:
+        'The view offset is included, so the value compares directly with instance x/y while ' +
+        'the view scrolls. Subtract `view_get()` for a position on screen.',
+      origin: 'global',
+    },
     { name: 'mouse_y', signature: '()', returns: 'number', summary: 'Mouse y in room coordinates.', origin: 'global' },
     {
       name: 'mouse_wheel',

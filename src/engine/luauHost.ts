@@ -23,7 +23,8 @@ interface PreludeApi {
     input: string,
     dt: number,
   ) => Promise<[string, number, number, number, number, number, number, boolean]>;
-  start: (room: string) => Promise<unknown>;
+  start: (room: string, fps: number) => Promise<unknown>;
+  room_current: () => Promise<string>;
   reset: () => Promise<unknown>;
   register_sprite: (...args: unknown[]) => Promise<unknown>;
   register_object: (...args: unknown[]) => Promise<unknown>;
@@ -72,7 +73,7 @@ async function getHost(): Promise<{ state: LuauState; api: PreludeApi }> {
 
     const api = {} as Record<string, unknown>;
     for (const name of [
-      'frame', 'start', 'reset',
+      'frame', 'start', 'reset', 'room_current',
       'register_sprite', 'register_tileset', 'register_object',
       'register_room', 'register_room_layer', 'register_font', 'register_module',
     ]) {
@@ -101,8 +102,12 @@ class LuauHost implements ScriptHost {
     await this.api.reset();
   }
 
-  async start(room: string): Promise<void> {
-    await this.api.start(room);
+  async start(room: string, fps: number): Promise<void> {
+    await this.api.start(room, fps);
+  }
+
+  async roomCurrent(): Promise<string> {
+    return String(await this.api.room_current());
   }
 
   async frame(input: string, dt: number): Promise<FrameResult> {

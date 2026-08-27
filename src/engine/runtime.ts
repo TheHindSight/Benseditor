@@ -3,9 +3,10 @@ import { colorToInt, encodeTiles, tilePixel, type Project } from '../project/typ
 import { buildAtlas, loadFrame, type Atlas, type AtlasSource } from './atlas';
 import { buildFont, packFontMetrics } from './font';
 import { InputCapture } from './input';
+import { FixedStepClock } from './fixedStep';
 import { FrameDecoder } from './protocol';
 import { Renderer } from './renderer';
-import type { ScriptHost, ScriptHostFactory } from './scriptHost';
+import type { FrameResult, ScriptHost, ScriptHostFactory } from './scriptHost';
 
 /**
  * Hosts a running game.
@@ -83,6 +84,9 @@ export class GameRuntime {
   private pending: Promise<void> | null = null;
   private lastFrameAt = 0;
 
+  /** Steps run so far; the browser tests check the rate. */
+  private steps = 0;
+
   private constructor(
     private readonly host: ScriptHost,
     private readonly renderer: Renderer,
@@ -91,6 +95,7 @@ export class GameRuntime {
     private readonly gl: WebGL2RenderingContext,
     private readonly scale: number,
     private readonly onError: ErrorReporter,
+    private readonly clock: FixedStepClock,
   ) {}
 
   /**
@@ -124,7 +129,11 @@ export class GameRuntime {
     const input = new InputCapture(canvas);
     const scale = Math.max(1, project.config.window.scale || 1);
 
-    const runtime = new GameRuntime(host, renderer, input, canvas, gl, scale, onError);
+    // The game steps `fps` times a second whatever the display's refresh rate.
+    const fps = Math.min(240, Math.max(1, Math.round(project.config.fps || 60)));
+    const runtime = new GameRuntime(
+      host, renderer, input, canvas, gl, scale, onError, new FixedStepClock(1 / fps),
+    );
 
     // Checked here so the message names the fix rather than surfacing as a
     // Luau error from deep inside the prelude.
@@ -140,7 +149,7 @@ export class GameRuntime {
       );
     }
 
-    await host.start(start.name);
+    await host.start(start.name, fps);
     return runtime;
   }
 
@@ -334,49 +343,78 @@ export class GameRuntime {
     this.pending = null;
   }
 
-  /** Rolling average frame time in milliseconds. */
+  /** Rolling average cost of one game step, in milliseconds. */
   get averageFrameMs(): number {
     if (this.frameTimes.length === 0) return 0;
     return this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length;
   }
 
+  /** How many steps have run since start(). */
+  get stepCount(): number {
+    return this.steps;
+  }
+
+  /** The room the game is in right now. Waits for any in-flight step. */
+  async currentRoom(): Promise<string> {
+    try {
+      await this.pending;
+    } catch {
+      // Already reported by tick().
+    }
+    return this.host.roomCurrent();
+  }
+
   /**
-   * One frame.
+   * One animation frame: zero or more fixed steps, then one draw.
    *
-   * Awaits the Luau call rather than driving from a bare rAF callback, so
-   * frames can never overlap even if one runs long.
+   * Awaits each VM call rather than driving from a bare rAF callback, so
+   * steps can never overlap even if one runs long. `dt` handed to the game is
+   * the constant step length, so `task.wait(1)` is exactly `fps` steps.
    */
   private async tick(): Promise<void> {
     if (!this.running) return;
 
-    const started = performance.now();
+    const now = performance.now();
+    const steps = this.clock.advance((now - this.lastFrameAt) / 1000);
+    this.lastFrameAt = now;
+
+    let last: FrameResult | null = null;
     try {
-      // Clamped so a backgrounded tab does not resume with a huge delta that
-      // fires every scheduled task at once.
-      const dt = Math.min(0.25, Math.max(0, (started - this.lastFrameAt) / 1000)) || 1 / 60;
-      this.lastFrameAt = started;
+      for (let i = 0; i < steps; i++) {
+        const started = performance.now();
+        // The snapshot happens per step, so input edges land in exactly one.
+        const call = this.host.frame(this.input.snapshot(), this.clock.stepSeconds);
+        this.pending = call.then(
+          () => undefined,
+          () => undefined,
+        );
+        last = await call;
+        this.pending = null;
+        this.steps++;
 
-      const call = this.host.frame(this.input.snapshot(), dt);
-      this.pending = call.then(
-        () => undefined,
-        () => undefined,
-      );
-      const { payload, count, background, viewWidth, viewHeight, viewX, viewY, quit } = await call;
-      this.pending = null;
+        // A stop() during the await means this step is stale; drop it.
+        if (!this.running) return;
 
-      // A stop() during the await means this frame is stale; drop it.
-      if (!this.running) return;
-
-      this.input.setView(viewWidth, viewHeight);
-      this.resizeTo(viewWidth, viewHeight);
-
-      const commands = this.decoder.decode(payload, count);
-      this.renderer.drawFrame(commands, background, viewWidth, viewHeight, viewX, viewY);
-
-      if (quit) {
-        this.stop();
-        return;
+        this.frameTimes.push(performance.now() - started);
+        if (this.frameTimes.length > 60) this.frameTimes.shift();
+        if (last.quit) break;
       }
+
+      if (last) {
+        const { payload, count, background, viewWidth, viewHeight, viewX, viewY, quit } = last;
+        this.input.setView(viewWidth, viewHeight);
+        this.resizeTo(viewWidth, viewHeight);
+
+        const commands = this.decoder.decode(payload, count);
+        this.renderer.drawFrame(commands, background, viewWidth, viewHeight, viewX, viewY);
+
+        if (quit) {
+          this.stop();
+          return;
+        }
+      }
+      // With no step due, the canvas keeps the previous frame: the context is
+      // created with preserveDrawingBuffer.
     } catch (error) {
       this.pending = null;
       // Errors raised while shutting down are a consequence of the teardown,
@@ -386,9 +424,6 @@ export class GameRuntime {
       this.onError(error instanceof Error ? error.message : String(error));
       return;
     }
-
-    this.frameTimes.push(performance.now() - started);
-    if (this.frameTimes.length > 60) this.frameTimes.shift();
 
     this.rafHandle = requestAnimationFrame(() => void this.tick());
   }

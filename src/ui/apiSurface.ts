@@ -83,6 +83,8 @@ export const ENGINE_FUNCTIONS: ApiEntry[] = documented([
   { name: 'keyboard_check_pressed', kind: 'function', signature: '(key)', doc: 'True on the step the key went down.' },
   { name: 'keyboard_check_released', kind: 'function', signature: '(key)', doc: 'True on the step the key came up.' },
   { name: 'mouse_check_button', kind: 'function', signature: '(button?)', doc: '"left", "right" or "middle".' },
+  { name: 'mouse_check_button_pressed', kind: 'function', signature: '(button?)' },
+  { name: 'mouse_check_button_released', kind: 'function', signature: '(button?)' },
   { name: 'mouse_x', kind: 'function', signature: '()' },
   { name: 'mouse_y', kind: 'function', signature: '()' },
   { name: 'mouse_wheel', kind: 'function', signature: '()', doc: '-1, 0 or 1 this step.' },
@@ -91,6 +93,7 @@ export const ENGINE_FUNCTIONS: ApiEntry[] = documented([
   { name: 'draw_sprite', kind: 'function', signature: '(sprite, index, x, y)' },
   { name: 'draw_sprite_ext', kind: 'function', signature: '(sprite, index, x, y, xscale, yscale, angle, colour, alpha)' },
   { name: 'draw_text', kind: 'function', signature: '(x, y, text, colour?)' },
+  { name: 'draw_text_transformed', kind: 'function', signature: '(x, y, text, xscale, yscale, angle, colour?)' },
   { name: 'draw_rectangle', kind: 'function', signature: '(x1, y1, x2, y2, outline)' },
   { name: 'draw_line', kind: 'function', signature: '(x1, y1, x2, y2, width?)' },
   { name: 'draw_circle', kind: 'function', signature: '(x, y, radius, outline)' },
@@ -304,6 +307,7 @@ export const DATASTORE_METHODS: ApiEntry[] = documented([
 export const KEY_NAMES = [
   'left', 'right', 'up', 'down', 'space', 'enter', 'escape', 'shift', 'ctrl', 'alt',
   'tab', 'backspace', 'delete', 'home', 'end', 'pageup', 'pagedown', 'comma', 'period',
+  'minus', 'equal', 'slash', 'semicolon', 'quote', 'bracketleft', 'bracketright', 'backquote',
   ...'abcdefghijklmnopqrstuvwxyz'.split(''),
   ...'0123456789'.split(''),
 ];

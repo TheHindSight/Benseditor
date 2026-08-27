@@ -345,6 +345,29 @@ ok("mouse_wheel", mouse_wheel() == 1, tostring(mouse_wheel()))
 `;
 await state.loadstring(INPUT_CHECK, 'input.luau', true)();
 
+// Mouse edges and the view offset: a press on one step, a release on the next.
+await g('frame')('a|||10,20,1,0,1,0', 1 / 60);
+await state.loadstring(`
+local function ok(name, condition, detail)
+    __test_report(name, condition == true, detail or "")
+end
+ok("mouse_check_button_pressed", mouse_check_button_pressed("left") == true and mouse_check_button_pressed("right") == false)
+ok("mouse_check_button_released is false while held", mouse_check_button_released("left") == false)
+view_set(100, 50)
+ok("mouse_x follows the view", mouse_x() == 110 and mouse_y() == 70, \`{mouse_x()},{mouse_y()}\`)
+view_set(0, 0)
+draw_text_transformed(10, 10, "AB", 2, 2, 0, c_white)
+`, 'edges.luau', true)();
+await g('frame')('|||10,20,0,0,0,1', 1 / 60);
+await state.loadstring(`
+local function ok(name, condition, detail)
+    __test_report(name, condition == true, detail or "")
+end
+ok("mouse_check_button_released", mouse_check_button_released("left") == true)
+ok("mouse_check_button_pressed clears", mouse_check_button_pressed("left") == false)
+ok("room_speed", room_speed() == 60, tostring(room_speed()))
+`, 'edges2.luau', true)();
+
 // Built-in movement fields, over a frame.
 const MOVEMENT = `
 local function ok(name, condition, detail)

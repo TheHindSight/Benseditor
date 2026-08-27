@@ -167,7 +167,7 @@ Use it for HUD and overlays: it is drawn last, so it is always on top. It is **n
 
 *Exactly what happens, in order, every step.*
 
-One `requestAnimationFrame` drives one step. Everything below happens in a single call into the Luau VM, in this order:
+The game steps `room_speed()` times a second — 60 unless the project says otherwise. Everything below happens in a single call into the VM, in this order:
 
 - This frame’s keyboard and mouse state is applied.
 - `UserInputService.InputBegan` fires for each key pressed this frame, `InputEnded` for each released.
@@ -186,9 +186,9 @@ One `requestAnimationFrame` drives one step. Everything below happens in a singl
 - `draw_gui` on every instance.
 - A `room_goto` or `room_restart` requested during the step takes effect now.
 
-### Steps are frames
+### Fixed timestep
 
-The loop runs one step per animation frame, so on a 144 Hz display it steps 144 times a second. Anything counted in steps — alarms, `image_speed`, a counter you increment yourself — therefore runs faster on a faster display. `RunService.Heartbeat` and `task.wait` are given the real elapsed time (clamped to 0.25 s so a backgrounded tab does not resume with an enormous delta), so use those if you need wall-clock timing. `room_speed()` reports 60 as the nominal rate.
+Steps happen on a fixed clock, not per animation frame: a 144 Hz display still steps 60 times a second, so anything counted in steps — alarms, `image_speed`, a counter you increment yourself — runs at the same speed everywhere, and the delta handed to `RunService.Heartbeat` and `task.wait` is a constant `1 / room_speed()`. When the machine falls behind (a hitch, a backgrounded tab) at most three steps run before a frame is drawn and the rest of the backlog is dropped, so the game slows down rather than racing to catch up.
 
 ### Depth
 
@@ -304,7 +304,7 @@ A flag seeded from the object. The engine never reads it.
 
 #### `depth`
 
-Draw order. Larger is further back. Seeded from the object.
+Draw order. Larger is further back. Seeded from the object; assigning it re-sorts before the next draw.
 
 #### `alarms`
 

@@ -325,6 +325,33 @@ console.log('\n=== depth ordering ===');
   check('lower depth drawn last (in front)', near(cmds[1].p[1], 1), `second x=${cmds[1]?.p[1]}`);
 }
 
+console.log('\n=== changing depth re-sorts the draw order ===');
+{
+  const e = await newEngine();
+  e.register_sprite('s', 0, 1, 8, 8, 0, 0, 12, 0, 0, 7, 7);
+  addObject(e, 'obj_a', '', { sprite: 's', depth: 0 });
+  addObject(
+    e,
+    'obj_b',
+    `
+def step(self):
+    if not hasattr(self, "frames"):
+        self.frames = 0
+    self.frames += 1
+    if self.frames == 2:
+        self.depth = 10
+`,
+    { sprite: 's', depth: 0 },
+  );
+  e.register_room('rm_main', 320, 200, 0, 16, 16, 'obj_a,1,1,1,1,0;obj_b,2,2,1,1,0');
+  e.start('rm_main');
+
+  let cmds = e.frame('').commands;
+  check('equal depths draw in creation order', near(cmds[0].p[1], 1) && near(cmds[1].p[1], 2), `${cmds[0]?.p[1]},${cmds[1]?.p[1]}`);
+  cmds = e.frame('').commands;
+  check('assigning depth re-sorts before the next draw', near(cmds[0].p[1], 2) && near(cmds[1].p[1], 1), `${cmds[0]?.p[1]},${cmds[1]?.p[1]}`);
+}
+
 // The Luau suite exercises Luau-only syntax here (type annotations,
 // `continue`, string interpolation); the Python equivalents are annotations,
 // `continue` and f-strings, and the sum must come out the same.

@@ -24,7 +24,8 @@ type PyFunction = (...args: unknown[]) => unknown;
 
 interface PreludeApi {
   frame: (input: string, dt: number) => string;
-  start: (room: string) => unknown;
+  start: (room: string, fps: number) => unknown;
+  room_current: () => unknown;
   reset: () => unknown;
   register_sprite: PyFunction;
   register_tileset: PyFunction;
@@ -38,6 +39,7 @@ interface PreludeApi {
 const ENTRY_POINTS: Record<keyof PreludeApi, string> = {
   frame: '__frame_packed',
   start: '__start',
+  room_current: 'room_current',
   reset: '__reset',
   register_sprite: '__register_sprite',
   register_tileset: '__register_tileset',
@@ -95,8 +97,12 @@ class PythonHost implements ScriptHost {
     this.api.reset();
   }
 
-  async start(room: string): Promise<void> {
-    this.api.start(room);
+  async start(room: string, fps: number): Promise<void> {
+    this.api.start(room, fps);
+  }
+
+  async roomCurrent(): Promise<string> {
+    return String(this.api.room_current() ?? '');
   }
 
   async frame(input: string, dt: number): Promise<FrameResult> {

@@ -286,11 +286,25 @@ end
 -- input, refreshed once per frame from the host
 --=============================================================================
 
+-- Declared here, ahead of the input section, because mouse_x/mouse_y add it.
+local view_x, view_y = 0, 0
+
 local held: { [string]: boolean } = {}
 local pressed: { [string]: boolean } = {}
 local released: { [string]: boolean } = {}
 
-local mouse_state = { x = 0, y = 0, left = false, right = false, middle = false, wheel = 0 }
+local mouse_state = {
+	x = 0,
+	y = 0,
+	left = false,
+	right = false,
+	middle = false,
+	wheel = 0,
+	-- Buttons that went down / came up this step, as bit masks.
+	pressed_mask = 0,
+	released_mask = 0,
+}
+local BUTTON_BITS = { left = 1, right = 2, middle = 4 }
 
 local function parse_key_set(text: string, into: { [string]: boolean })
 	table.clear(into)
@@ -304,7 +318,8 @@ local function parse_key_set(text: string, into: { [string]: boolean })
 	end
 end
 
---- `held|pressed|released|mouseX,mouseY,buttonMask,wheel`
+--- `held|pressed|released|mouseX,mouseY,buttonMask,wheel,pressedMask,releasedMask`
+--- (the last two are optional; older hosts send four mouse fields)
 local function apply_input(input: string)
 	local parts = string.split(input, "|")
 	parse_key_set(parts[1] or "", held)
@@ -319,6 +334,8 @@ local function apply_input(input: string)
 	mouse_state.right = (mask // 2) % 2 >= 1
 	mouse_state.middle = (mask // 4) % 2 >= 1
 	mouse_state.wheel = tonumber(m[4]) or 0
+	mouse_state.pressed_mask = tonumber(m[5]) or 0
+	mouse_state.released_mask = tonumber(m[6]) or 0
 end
 
 function keyboard_check(key: string): boolean
@@ -337,12 +354,30 @@ function mouse_check_button(button: string?): boolean
 	return mouse_state[button or "left"] == true
 end
 
+local function button_in_mask(mask: number, button: string?): boolean
+	local bit = BUTTON_BITS[button or "left"]
+	if not bit then
+		return false
+	end
+	return (mask // bit) % 2 >= 1
+end
+
+function mouse_check_button_pressed(button: string?): boolean
+	return button_in_mask(mouse_state.pressed_mask, button)
+end
+
+function mouse_check_button_released(button: string?): boolean
+	return button_in_mask(mouse_state.released_mask, button)
+end
+
+-- Room coordinates: the host measures the mouse against the view, and the
+-- view's offset is added here, so the value compares with instance x/y.
 function mouse_x(): number
-	return mouse_state.x
+	return mouse_state.x + view_x
 end
 
 function mouse_y(): number
-	return mouse_state.y
+	return mouse_state.y + view_y
 end
 
 function mouse_wheel(): number
@@ -439,7 +474,7 @@ local pending_destroy: { any } = {}
 local current_room = nil
 local room_width_value = 0
 local room_height_value = 0
-local view_x, view_y = 0, 0
+-- (view_x, view_y are declared with the input section above.)
 -- The visible area's size; the room's size unless a game asks for a window.
 local view_width_value, view_height_value = 0, 0
 local room_change_request = nil
@@ -459,7 +494,7 @@ local SIGNAL_FIELDS = { Destroying = true, Collided = true }
 
 --- Roblox-style properties resolved by the metatable rather than stored under
 --- that name: `Parent` reads and writes the tree, `Name` aliases `name`.
-local PROPERTY_FIELDS = { Parent = true, Name = true }
+local PROPERTY_FIELDS = { Parent = true, Name = true, depth = true }
 
 local set_parent -- defined with the tree functions below
 
@@ -473,6 +508,9 @@ InstanceMeta.__index = function(self, key)
 			local parent = rawget(self, "__parent")
 			-- A root instance's parent is the Workspace, as in Roblox.
 			return if parent ~= nil then parent else Workspace
+		end
+		if key == "depth" then
+			return rawget(self, "__depth")
 		end
 		return rawget(self, "name")
 	end
@@ -491,6 +529,13 @@ InstanceMeta.__newindex = function(self, key, value)
 		set_parent(self, value)
 	elseif key == "Name" then
 		rawset(self, "name", value)
+	elseif key == "depth" then
+		-- Kept out of the constructor so this setter sees every assignment,
+		-- and the draw order is rebuilt before the next frame.
+		if rawget(self, "__depth") ~= value then
+			rawset(self, "__depth", value)
+			order_dirty = true
+		end
 	else
 		rawset(self, key, value)
 	end
@@ -885,6 +930,38 @@ function draw_text(x, y, text, color)
 	end
 end
 
+--- draw_text with scale and rotation: glyphs are sprites, so this costs the
+--- same as draw_text. NEAREST filtering keeps 2x-4x text crisp.
+function draw_text_transformed(x, y, text, xscale, yscale, angle, color)
+	local r, g, b = unpack_color(color or draw_color)
+	xscale = xscale or 1
+	yscale = yscale or 1
+	angle = angle or 0
+	local rad = math.rad(angle)
+	local cos_a, sin_a = math.cos(rad), math.sin(rad)
+	local pen_x, pen_y = 0, 0
+
+	for index = 1, #text do
+		local code = string.byte(text, index)
+		if code == 10 then
+			pen_x = 0
+			pen_y += font_line_height * yscale
+			continue
+		end
+
+		local glyph = glyphs[code]
+		if glyph then
+			-- Rotate the pen offset the way the renderer rotates sprites (y down).
+			local gx = x + pen_x * cos_a + pen_y * sin_a
+			local gy = y - pen_x * sin_a + pen_y * cos_a
+			emit(CMD_SPRITE, glyph.atlas, gx, gy, xscale, yscale, angle, r, g, b, draw_alpha)
+			pen_x += glyph.advance * xscale
+		else
+			pen_x += font_line_height * 0.5 * xscale
+		end
+	end
+end
+
 function string_width(text: string): number
 	local width, longest = 0, 0
 	for index = 1, #text do
@@ -949,7 +1026,7 @@ local function make_instance(object_name: string, x: number, y: number, name: st
 
 		visible = def.visible,
 		solid = def.solid,
-		depth = def.depth,
+		__depth = def.depth,
 		alarms = table.create(ALARM_COUNT, -1),
 	}, InstanceMeta)
 
@@ -1070,8 +1147,10 @@ function room_height(): number
 	return room_height_value
 end
 
+local room_speed_value = 60
+
 function room_speed(): number
-	return 60
+	return room_speed_value
 end
 
 function room_goto(name: string)
@@ -1200,7 +1279,9 @@ local function enter_room(name: string)
 	end
 end
 
-function __start(room_name: string)
+--- `fps` is the fixed step rate the host runs at; `room_speed()` reports it.
+function __start(room_name: string, fps: number?)
+	room_speed_value = fps or 60
 	enter_room(room_name)
 end
 
@@ -1264,6 +1345,7 @@ function __reset()
 	room_height_value = 0
 	view_width_value, view_height_value = 0, 0
 	view_x, view_y = 0, 0
+	room_speed_value = 60
 	room_change_request = nil
 	quit_requested = false
 
@@ -1631,10 +1713,11 @@ local function rebuild_order()
 	end
 	-- Larger depth draws further back.
 	table.sort(ordered, function(a, b)
-		if a.depth == b.depth then
+		local da, db = rawget(a, "__depth"), rawget(b, "__depth")
+		if da == db then
 			return a.__id < b.__id
 		end
-		return a.depth > b.depth
+		return da > db
 	end)
 	order_dirty = false
 end
@@ -1691,7 +1774,7 @@ function __frame(input: string, dt: number?): (string, number, number, number, n
 		if inst.__destroyed then
 			continue
 		end
-		while next_layer <= #layers and layers[next_layer].depth > inst.depth do
+		while next_layer <= #layers and layers[next_layer].depth > rawget(inst, "__depth") do
 			draw_layer(layers[next_layer])
 			next_layer += 1
 		end

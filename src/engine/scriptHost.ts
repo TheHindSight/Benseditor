@@ -30,8 +30,11 @@ export interface ScriptHost {
   readonly language: ScriptLanguage;
   /** Wipe every registered asset and all live state; the VM itself is reused. */
   reset(): Promise<void>;
-  start(room: string): Promise<void>;
+  /** Enter the start room; `fps` is what `room_speed()` reports. */
+  start(room: string, fps: number): Promise<void>;
   frame(input: string, dt: number): Promise<FrameResult>;
+  /** The name of the room the game is in; for the editor and tests. */
+  roomCurrent(): Promise<string>;
 
   registerSprite(...args: unknown[]): Promise<void>;
   registerTileset(...args: unknown[]): Promise<void>;

@@ -61,8 +61,10 @@ Two halves that meet exactly **once per frame**.
 | **Engine** | Luau (WASM) — or Python (MicroPython WASM) | Instances, events, movement, collision, rooms, the entire drawing API |
 | **Host** | TypeScript | Atlas packing, WebGL2 rendering, input capture, project IO |
 
-Each frame the host calls `__frame(input)` and gets back the frame's draw
+Each step the host calls `__frame(input)` and gets back the step's draw
 commands as one base64 string plus its metadata. That is the *only* crossing.
+Steps run on a fixed clock — `room_speed()` times a second, 60 by default —
+whatever the display's refresh rate; a frame draws the latest step.
 The host talks to whichever engine through one seam, `src/engine/scriptHost.ts`;
 the two engines are the same program twice (`prelude.luau` / `prelude.py`),
 and `test:docs` fails if their public surfaces differ by a single name.
@@ -726,16 +728,17 @@ Everything above works and is covered by twenty-two suites, all run by `npm test
 | Suite | Checks | What it covers |
 | --- | --- | --- |
 | `test:vendor` | 1 | That the vendored MicroPython matches the pinned package |
-| `test:engine` | 88 | Engine behaviour — events, collision, rooms, tiles, depth |
-| `test:api` | 183 | **Every scripting function, individually** |
+| `test:fixed-step` | 11 | The fixed-step clock: 60 steps a second at 60, 120 and 144 Hz, capped catch-up |
+| `test:engine` | 90 | Engine behaviour — events, collision, rooms, tiles, depth |
+| `test:api` | 191 | **Every scripting function, individually** |
 | `test:tree` | 60 | The instance tree: parenting, lookup, cascade destroy, room changes, and that a flat world is unchanged |
 | `test:python-smoke` | 185 | Thirty scenes on the Python engine, including a 100-instance frame-time budget |
-| `test:engine-py` | 88 | The engine tests, same assertions, against the Python engine |
-| `test:api-py` | 183 | The per-function audit against the Python engine |
+| `test:engine-py` | 90 | The engine tests, same assertions, against the Python engine |
+| `test:api-py` | 191 | The per-function audit against the Python engine |
 | `test:python-syntax` | 107 | The Python tokeniser's invariants and the editor's Python rules |
 | `test:blocks` | 172 | Every block has both generators; fixtures generate Luau and Python that run identically on both engines |
 | `test:templates` | 16 | Every object template registered, started and stepped on both engines |
-| `test:dash` | 17 | Plays the Dash demo in Chromium: runs, dies on the first spike, restarts, jumps, draws its HUD |
+| `test:dash` | 19 | Plays the Dash demo in Chromium: runs, dies on the first spike, restarts, jumps, draws its HUD |
 | `test:docs` | 36 | The manual against the engine in both directions, both languages' examples, and that the two engines expose identical names |
 | `test:dev` | 4 | That `npm run dev` actually boots the app |
 | `test:browser` | 167 | The editors and the game in real Chromium, reading pixels back out of the WebGL canvas |

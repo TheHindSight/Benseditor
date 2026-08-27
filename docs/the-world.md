@@ -63,9 +63,9 @@ Room height in pixels.
 
 #### `room_speed()` → number
 
-The nominal steps per second, which is 60.
+The steps per second — 60 unless the project settings say otherwise.
 
-A constant, useful for expressing durations in seconds. The loop actually steps once per animation frame — see *The frame*.
+Useful for expressing durations in seconds: `room_speed() * 3` is three seconds. The game really does step this many times a second, whatever the display — see *The frame*.
 
 #### `view_set(x, y)`
 

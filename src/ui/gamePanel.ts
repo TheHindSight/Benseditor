@@ -171,6 +171,16 @@ export class GamePanel implements Panel {
   get frameMs(): number {
     return this.runtime?.averageFrameMs ?? 0;
   }
+
+  /** Steps the running game has taken; the tests check the rate. */
+  get stepCount(): number {
+    return this.runtime?.stepCount ?? 0;
+  }
+
+  /** The room the running game is in, or '' when nothing runs. */
+  room(): Promise<string> {
+    return this.runtime?.currentRoom() ?? Promise.resolve('');
+  }
 }
 
 /**

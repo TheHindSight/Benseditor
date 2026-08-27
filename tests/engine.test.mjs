@@ -289,6 +289,34 @@ console.log('\n=== depth ordering ===');
   check('lower depth drawn last (in front)', near(cmds[1].p[1], 1), `second x=${cmds[1]?.p[1]}`);
 }
 
+console.log('\n=== changing depth re-sorts the draw order ===');
+{
+  const e = await newEngine();
+  await e.g('register_sprite')('s', 0, 1, 8, 8, 0, 0, 12, 0, 0, 7, 7);
+  await addObject(e, 'obj_a', 'return {}', { sprite: 's', depth: 0 });
+  await addObject(
+    e,
+    'obj_b',
+    `
+    local obj = {}
+    function obj.step(self)
+        if self.frames == nil then self.frames = 0 end
+        self.frames += 1
+        if self.frames == 2 then self.depth = 10 end
+    end
+    return obj
+    `,
+    { sprite: 's', depth: 0 },
+  );
+  await e.g('register_room')('rm_main', 320, 200, 0, 16, 16, 'obj_a,1,1,1,1,0;obj_b,2,2,1,1,0');
+  await e.g('start')('rm_main');
+
+  let cmds = decode((await e.g('frame')(''))[0]);
+  check('equal depths draw in creation order', near(cmds[0].p[1], 1) && near(cmds[1].p[1], 2), `${cmds[0]?.p[1]},${cmds[1]?.p[1]}`);
+  cmds = decode((await e.g('frame')(''))[0]);
+  check('assigning depth re-sorts before the next draw', near(cmds[0].p[1], 2) && near(cmds[1].p[1], 1), `${cmds[0]?.p[1]},${cmds[1]?.p[1]}`);
+}
+
 console.log('\n=== Luau-only syntax is available to game code ===');
 {
   const e = await newEngine();

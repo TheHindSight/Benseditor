@@ -318,7 +318,18 @@ _held = set()
 _pressed = set()
 _released = set()
 
-_mouse_state = {"x": 0, "y": 0, "left": False, "right": False, "middle": False, "wheel": 0}
+_mouse_state = {
+    "x": 0,
+    "y": 0,
+    "left": False,
+    "right": False,
+    "middle": False,
+    "wheel": 0,
+    # Buttons that went down / came up this step, as bit masks.
+    "pressed_mask": 0,
+    "released_mask": 0,
+}
+_BUTTON_BITS = {"left": 1, "right": 2, "middle": 4}
 
 
 def _parse_key_set(text, into):
@@ -331,7 +342,8 @@ def _parse_key_set(text, into):
 
 
 def _apply_input(input):
-    """`held|pressed|released|mouseX,mouseY,buttonMask,wheel`"""
+    """`held|pressed|released|mouseX,mouseY,buttonMask,wheel,pressedMask,releasedMask`
+    (the last two are optional; older hosts send four mouse fields)"""
     parts = input.split("|")
     count = len(parts)
     _parse_key_set(parts[0] if count > 0 else "", _held)
@@ -347,6 +359,8 @@ def _apply_input(input):
     mouse["right"] = (mask // 2) % 2 >= 1
     mouse["middle"] = (mask // 4) % 2 >= 1
     mouse["wheel"] = _field(m, 3, 0)
+    mouse["pressed_mask"] = _field(m, 4, 0)
+    mouse["released_mask"] = _field(m, 5, 0)
 
 
 def keyboard_check(key):
@@ -365,12 +379,29 @@ def mouse_check_button(button=None):
     return _mouse_state.get(button or "left") is True
 
 
+def _button_in_mask(mask, button):
+    bit = _BUTTON_BITS.get(button or "left")
+    if not bit:
+        return False
+    return (int(mask) // bit) % 2 >= 1
+
+
+def mouse_check_button_pressed(button=None):
+    return _button_in_mask(_mouse_state["pressed_mask"], button)
+
+
+def mouse_check_button_released(button=None):
+    return _button_in_mask(_mouse_state["released_mask"], button)
+
+
+# Room coordinates: the host measures the mouse against the view, and the
+# view's offset is added here, so the value compares with instance x/y.
 def mouse_x():
-    return _mouse_state["x"]
+    return _mouse_state["x"] + _view_x
 
 
 def mouse_y():
-    return _mouse_state["y"]
+    return _mouse_state["y"] + _view_y
 
 
 def mouse_wheel():
@@ -482,7 +513,7 @@ SIGNAL_FIELDS = ("Destroying", "Collided")
 
 # Roblox-style properties resolved by the class rather than stored under that
 # name: `Parent` reads and writes the tree, `Name` aliases `name`.
-PROPERTY_FIELDS = ("Parent", "Name")
+PROPERTY_FIELDS = ("Parent", "Name", "depth")
 
 
 class _Alarms:
@@ -597,7 +628,7 @@ class Instance:
 
         self.visible = def_["visible"]
         self.solid = def_["solid"]
-        self.depth = def_["depth"]
+        self._depth = def_["depth"]
         self.alarms = _Alarms()
 
     # Only keys missing from the instance reach here: the built-in fields are
@@ -631,6 +662,18 @@ class Instance:
 
     Parent = property(_get_parent, _set_parent_property)
     Name = property(_get_name, _set_name)
+
+    def _get_depth(self):
+        return self._depth
+
+    def _set_depth(self, value):
+        # Assigning depth re-sorts the draw order before the next frame.
+        global _order_dirty
+        if value != self._depth:
+            self._depth = value
+            _order_dirty = True
+
+    depth = property(_get_depth, _set_depth)
 
     def is_a(self, name):
         return _object_is_a(self._object, name)
@@ -973,6 +1016,35 @@ def draw_text(x, y, text, color=None):
             pen_x += line_height * 0.5
 
 
+def draw_text_transformed(x, y, text, xscale=1, yscale=1, angle=0, color=None):
+    """draw_text with scale and rotation: glyphs are sprites, so this costs the
+    same as draw_text. NEAREST filtering keeps 2x-4x text crisp."""
+    r, g, b = _unpack_color(_draw_color if color is None else color)
+    alpha = _draw_alpha
+    glyphs = _glyphs
+    line_height = _font_line_height
+    rad = math.radians(angle)
+    cos_a, sin_a = math.cos(rad), math.sin(rad)
+    pen_x = 0.0
+    pen_y = 0.0
+
+    for code in str(text).encode("utf-8"):
+        if code == 10:
+            pen_x = 0.0
+            pen_y += line_height * yscale
+            continue
+
+        glyph = glyphs.get(code)
+        if glyph is not None:
+            # Rotate the pen offset the way the renderer rotates sprites (y down).
+            gx = x + pen_x * cos_a + pen_y * sin_a
+            gy = y - pen_x * sin_a + pen_y * cos_a
+            _emit(_CMD_SPRITE, glyph[0], gx, gy, xscale, yscale, angle, r, g, b, alpha)
+            pen_x += glyph[1] * xscale
+        else:
+            pen_x += line_height * 0.5 * xscale
+
+
 def string_width(text):
     width, longest = 0, 0
     for code in str(text).encode("utf-8"):
@@ -1100,8 +1172,11 @@ def room_height():
     return _room_height_value
 
 
+_room_speed_value = 60
+
+
 def room_speed():
-    return 60
+    return _room_speed_value
 
 
 def room_goto(name):
@@ -1217,7 +1292,10 @@ def _layer_depth_descending(layer):
     return -layer["depth"]
 
 
-def __start(room_name):
+def __start(room_name, fps=60):
+    """`fps` is the fixed step rate the host runs at; `room_speed()` reports it."""
+    global _room_speed_value
+    _room_speed_value = fps if fps else 60
     _enter_room(room_name)
 
 
@@ -1287,7 +1365,7 @@ def __reset():
     a new one per run, so this is what makes a re-run a clean slate."""
     global _instances, _next_id, _order_dirty
     global _current_room, _room_width_value, _room_height_value, _view_x, _view_y
-    global _view_width_value, _view_height_value
+    global _view_width_value, _view_height_value, _room_speed_value
     global _room_change_request, _quit_requested
     global _write_offset, _command_count, _draw_color, _draw_alpha
     global __API
@@ -1312,6 +1390,7 @@ def __reset():
     _room_height_value = 0
     _view_width_value, _view_height_value = 0, 0
     _view_x, _view_y = 0, 0
+    _room_speed_value = 60
     _room_change_request = None
     _quit_requested = False
 
@@ -1656,7 +1735,7 @@ def _rebuild_order():
     global _order_dirty
     groups = {}
     for inst in _instances:
-        depth = inst.depth
+        depth = inst._depth
         group = groups.get(depth)
         if group is None:
             groups[depth] = [inst]
@@ -1720,7 +1799,7 @@ def __frame_packed(input, dt=None):
     for inst in _ordered:
         if inst._destroyed:
             continue
-        while next_layer < layer_count and layers[next_layer]["depth"] > inst.depth:
+        while next_layer < layer_count and layers[next_layer]["depth"] > inst._depth:
             _draw_layer(layers[next_layer])
             next_layer += 1
 

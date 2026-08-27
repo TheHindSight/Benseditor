@@ -135,6 +135,12 @@ try {
   check('the camera follows, keeping the cube near the left third', running.minX > 200 && running.maxX < 420, `x ${running.minX}-${running.maxX}`);
   const frameMs = await page.evaluate(() => window.__benseditor.game.frameMs);
   check('a frame stays well inside budget', frameMs < 12, `${frameMs.toFixed(2)}ms`);
+  // The fixed timestep: sixty steps a second whatever the display does.
+  const stepsBefore = await page.evaluate(() => window.__benseditor.game.stepCount);
+  await page.waitForTimeout(2000);
+  const stepsDelta = (await page.evaluate(() => window.__benseditor.game.stepCount)) - stepsBefore;
+  check('the game steps sixty times a second', stepsDelta >= 100 && stepsDelta <= 140, `${stepsDelta} steps in 2 s`);
+  check('the runtime reports its room', (await page.evaluate(() => window.__benseditor.game.room())) === 'rm_level1');
   await page.screenshot({ path: join(outDir, 'dash-running.png') });
 
   // With nobody jumping, the first spike (column 24) ends the run within

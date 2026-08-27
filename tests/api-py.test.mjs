@@ -396,6 +396,23 @@ ok("mouse_check_button", mouse_check_button("left") is True and mouse_check_butt
 ok("mouse_wheel", mouse_wheel() == 1, mouse_wheel())
 `);
 
+// Mouse edges and the view offset: a press on one step, a release on the next.
+frame('a|||10,20,1,0,1,0', 1 / 60);
+run(`
+ok("mouse_check_button_pressed", mouse_check_button_pressed("left") is True and mouse_check_button_pressed("right") is False)
+ok("mouse_check_button_released is false while held", mouse_check_button_released("left") is False)
+view_set(100, 50)
+ok("mouse_x follows the view", mouse_x() == 110 and mouse_y() == 70, "%s,%s" % (mouse_x(), mouse_y()))
+view_set(0, 0)
+draw_text_transformed(10, 10, "AB", 2, 2, 0, c_white)
+`);
+frame('|||10,20,0,0,0,1', 1 / 60);
+run(`
+ok("mouse_check_button_released", mouse_check_button_released("left") is True)
+ok("mouse_check_button_pressed clears", mouse_check_button_pressed("left") is False)
+ok("room_speed", room_speed() == 60, room_speed())
+`);
+
 // Built-in movement fields, over a frame.
 run(`
 m = instance_create(0, 0, "obj_other")

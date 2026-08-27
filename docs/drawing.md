@@ -33,6 +33,22 @@ Draws a line of text, using the current colour if none is given.
 
 Newlines start a new line at the original x. The built-in font covers printable ASCII (space to `~`); anything else advances half a line height and draws nothing.
 
+#### `draw_text_transformed(x, y, text, xscale, yscale, angle, colour?)`
+
+Draws text scaled and rotated; big crisp text for titles and menus.
+
+Each glyph is a sprite, so this costs the same as draw_text. Scaled text is `string_width(text) * xscale` wide. Angle is degrees counter-clockwise, about (x, y).
+
+```lua
+local title = "READY"
+draw_text_transformed(240 - string_width(title) * 3 / 2, 40, title, 3, 3, 0, c_yellow)
+```
+
+```python
+title = "READY"
+draw_text_transformed(240 - string_width(title) * 3 / 2, 40, title, 3, 3, 0, c_yellow)
+```
+
 #### `draw_rectangle(x1, y1, x2, y2, outline)`
 
 Draws a rectangle in the current colour and alpha.
