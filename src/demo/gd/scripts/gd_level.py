@@ -116,6 +116,13 @@ def _create(x, y, object_name):
         raise
 
 
+# Pad/orb parameter letters (see TYPES in gd_const) to the names gdphys uses.
+_KIND_NAME = {
+    "y": "yellow", "p": "pink", "r": "red", "b": "blue", "g": "green",
+    "k": "black", "w": "spider", "d": "dash",
+}
+
+
 def spawn_object(code, param, col, row, tiles=None):
     """Create the instance for one level object; blocks are tiles and give None."""
     info = TYPES.get(code)
@@ -125,7 +132,8 @@ def spawn_object(code, param, col, row, tiles=None):
     if inst is None:
         return None
     if code in ("P", "O"):
-        inst.kind = param
+        # gdphys compares full names; the level format stores a letter.
+        inst.kind = _KIND_NAME.get(param, param)
     else:
         inst.kind = int(param) if param != "" else 0
     inst.col = col

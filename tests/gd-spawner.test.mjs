@@ -269,9 +269,9 @@ _c = spawn_object("C", "2", 24, 0, _tiles)
 _b = spawn_object("B", "", 25, 0, _tiles)
 `);
   check('a down spike gets kind 1 and image_yscale -1', py('[_s.kind, _s.image_yscale, _s.col, _s.row]').join() === '1,-1,20,3');
-  check('a pad under a block hangs (flipped)', py('[_p.kind, _p.image_yscale]').join() === 'y,-1');
-  check('a pad on the ground is upright', py('[_p2.kind, _p2.image_yscale]').join() === 'r,1');
-  check('an orb keeps its colour letter', py('_o.kind') === 'k' && py('_o.is_a("obj_orb")') === true);
+  check('a pad under a block hangs (flipped)', py('[_p.kind, _p.image_yscale]').join() === 'yellow,-1');
+  check('a pad on the ground is upright', py('[_p2.kind, _p2.image_yscale]').join() === 'red,1');
+  check('an orb gets its colour name (the physics compares names)', py('_o.kind') === 'black' && py('_o.is_a("obj_orb")') === true);
   check('a mode portal gets an int kind', py('_m.kind') === 4 && py('_m.is_a("obj_portal_mode")') === true);
   check('a coin gets kind and index', py('[_c.kind, _c.index]').join() === '2,2');
   check('a block spawns nothing', py('_b') === null);

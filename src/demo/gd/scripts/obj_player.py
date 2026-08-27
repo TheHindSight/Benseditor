@@ -60,8 +60,15 @@ def collision(self, other):
 
 
 def draw(self):
-    if self.visible:
-        self.draw_self()
+    if not self.visible:
+        return
+    # Draw the icon in the player's chosen colours (image_blend tinting), with
+    # the gamemode's sprite and gd_animate's rotation/scale.
+    primary, secondary, shape = icon_settings()
+    icon_draw_mode(
+        self.x, self.y, self.mode, primary, secondary, shape,
+        self.image_xscale, self.image_yscale, self.image_angle, self.image_alpha,
+    )
 
 
 def alarm(self, index):
